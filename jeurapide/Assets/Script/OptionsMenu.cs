@@ -1,45 +1,65 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class OptionsMenu : MonoBehaviour
 {
-    [Header("UI")]
-    public Slider luminositeSlider;
-    public Slider sensibiliteSlider;
-    public Image overlayLuminosite;
-
     [Header("Panels")]
     public GameObject panelOptions;
 
-    [Header("Souris")]
-    public static float sensibiliteSouris = 2f;
+    [Header("UI")]
+    public Slider luminositeSlider;
+    public Slider sensibiliteSlider;
+
+    [Header("Post Processing")]
+    public Volume volume;
+    private LiftGammaGain liftGammaGain;
 
     void Start()
     {
-        panelOptions.SetActive(false);
-        // Charger les valeurs sauvegardées
-        luminositeSlider.value = PlayerPrefs.GetFloat("Luminosite", 0.2f);
+        // Gamma
+        if (volume.profile.TryGet(out liftGammaGain))
+        {
+            float savedGamma = PlayerPrefs.GetFloat("Luminosite", 1f);
+            luminositeSlider.value = savedGamma;
+            liftGammaGain.gamma.value = new Vector4(savedGamma, savedGamma, savedGamma, 0f);
+        }
+
+        // Sensibilité
         sensibiliteSlider.value = PlayerPrefs.GetFloat("SensibiliteSouris", 2f);
 
-        AppliquerLuminosite(luminositeSlider.value);
-        AppliquerSensibilite(sensibiliteSlider.value);
+        // Menu fermé au départ
+        panelOptions.SetActive(false);
     }
 
     public void AppliquerLuminosite(float value)
     {
-        Color c = overlayLuminosite.color;
-        c.a = value;
-        overlayLuminosite.color = c;
-
-        PlayerPrefs.SetFloat("Luminosite", value);
+        if (liftGammaGain != null)
+        {
+            liftGammaGain.gamma.value = new Vector4(0, 0, 0, value);
+            PlayerPrefs.SetFloat("Luminosite", value);
+        }
     }
 
     public void AppliquerSensibilite(float value)
     {
-        sensibiliteSouris = value;
         PlayerPrefs.SetFloat("SensibiliteSouris", value);
     }
-
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (panelOptions.activeSelf)
+            {
+                FermerMenu();
+            }
+            else
+            {
+                OuvrirMenu();
+            }
+        }
+    }
     public void OuvrirMenu()
     {
         panelOptions.SetActive(true);
@@ -52,7 +72,6 @@ public class OptionsMenu : MonoBehaviour
     {
         panelOptions.SetActive(false);
         Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
+    
 }
