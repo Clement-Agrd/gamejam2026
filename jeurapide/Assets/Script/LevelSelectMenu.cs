@@ -21,9 +21,9 @@ public class LevelSelectMenu : MonoBehaviour
         panelLevelSelect.SetActive(false);
     }
 
-    public void ChargerNiveau(string nomScene)
+    void Update()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(nomScene);
+        if (Input.GetKeyDown(KeyCode.P))
+            panelLevelSelect.SetActive(false);
     }
 }
