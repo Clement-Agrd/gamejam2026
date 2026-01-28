@@ -1,34 +1,64 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(FirstPersonMovement))]
 public class Jump : MonoBehaviour
 {
-    Rigidbody rigidbody;
-    public float jumpStrength = 2;
-    public event System.Action Jumped;
+    Rigidbody rb;
+    FirstPersonMovement player;
 
-    [SerializeField, Tooltip("Prevents jumping when the transform is in mid-air.")]
+    [Header("Jump Settings")]
+    public float jumpStrength = 2f;
+
+    [SerializeField, Tooltip("Ground check to detect if player is on ground")]
     GroundCheck groundCheck;
 
-
-    void Reset()
-    {
-        // Try to get groundCheck.
-        groundCheck = GetComponentInChildren<GroundCheck>();
-    }
+    public int jumpCount = 0;   // Compteur de sauts
+    public int maxJumps = 1;    // Sauts max autorisés
+    private float jumpCooldown = 0.1f;
+    private float lastJumpTime;
 
     void Awake()
     {
-        // Get rigidbody.
-        rigidbody = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
+        player = GetComponent<FirstPersonMovement>();
+
+        if (player == null)
+            Debug.LogError("[Jump] FirstPersonMovement introuvable !");
+
+        if (groundCheck == null)
+            groundCheck = GetComponentInChildren<GroundCheck>();
+
+        // ✅ Assurer que le player commence sans double jump
+        player.canDoubleJump = false;
+        player.canDash = false;
+        player.canGlide = false;
     }
 
-    void LateUpdate()
+
+    void Update()
     {
-        // Jump when the Jump button is pressed and we are on the ground.
-        if (Input.GetButtonDown("Jump") && (!groundCheck || groundCheck.isGrounded))
+        if (groundCheck != null && groundCheck.isGrounded && Time.time - lastJumpTime > jumpCooldown)
         {
-            rigidbody.AddForce(Vector3.up * 100 * jumpStrength);
-            Jumped?.Invoke();
+            jumpCount = 0;
         }
+
+        maxJumps = (player != null && player.canDoubleJump) ? 2 : 1;
+
+        if (Input.GetButtonDown("Jump") && jumpCount < maxJumps)
+        {
+            PerformJump();
+        }
+    }
+
+    private void PerformJump()
+    {
+        Vector3 velocity = rb.linearVelocity;
+        velocity.y = 0f;
+        rb.linearVelocity = velocity;
+
+        rb.AddForce(Vector3.up * 100f * jumpStrength);
+        jumpCount++;
+        lastJumpTime = Time.time; // ← on met à jour le cooldown
     }
 }
