@@ -7,55 +7,49 @@ public class FirstPersonLook : MonoBehaviour
 
     [Header("Look Settings")]
     public float sensitivity = 2f;
-    public float smoothing = 1.5f;
 
-    private Vector2 velocity;
-    private Vector2 frameVelocity;
+    private Vector2 rotation;
 
     void Reset()
     {
-        // Récupère automatiquement le personnage parent
         character = GetComponentInParent<FirstPersonMovement>().transform;
     }
 
     void Start()
     {
-        // Verrouille la souris
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Charge la sensibilité sauvegardée
         sensitivity = PlayerPrefs.GetFloat("SensibiliteSouris", sensitivity);
     }
 
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (Cursor.lockState != CursorLockMode.Locked)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+        }
+
         // Bloque le look si le menu est ouvert
         if (Cursor.lockState != CursorLockMode.Locked)
             return;
-
-        // Lecture de la sensibilité en temps réel
+        // Sensibilité en temps réel
         float currentSensitivity = PlayerPrefs.GetFloat("SensibiliteSouris", sensitivity);
 
-        // Entrées souris (ancien Input)
-        Vector2 mouseDelta = new Vector2(
-            Input.GetAxisRaw("Mouse X"),
-            Input.GetAxisRaw("Mouse Y")
-        );
+        float mouseX = Input.GetAxisRaw("Mouse X") * currentSensitivity;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * currentSensitivity;
 
-        // Calcul du mouvement avec smoothing
-        Vector2 rawFrameVelocity = mouseDelta * currentSensitivity;
-        frameVelocity = Vector2.Lerp(
-            frameVelocity,
-            rawFrameVelocity,
-            Time.deltaTime * (1f / smoothing)
-        );
+        rotation.x += mouseX;
+        rotation.y += mouseY;
+        rotation.y = Mathf.Clamp(rotation.y, -90f, 90f);
 
-        velocity += frameVelocity;
-        velocity.y = Mathf.Clamp(velocity.y, -90f, 90f);
-
-        // Application des rotations
-        transform.localRotation = Quaternion.AngleAxis(-velocity.y, Vector3.right);
-        character.localRotation = Quaternion.AngleAxis(velocity.x, Vector3.up);
+        transform.localRotation = Quaternion.Euler(-rotation.y, 0f, 0f);
+        character.localRotation = Quaternion.Euler(0f, rotation.x, 0f);
     }
 }
