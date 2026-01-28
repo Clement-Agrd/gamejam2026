@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,10 +8,13 @@ public class FirstPersonMovement : MonoBehaviour
     [Header("Movement")]
     public float speed = 5f;
     public float runSpeed = 9f;
-    public KeyCode runningKey = KeyCode.LeftShift;
+    public float airControlMultiplier = 0.5f;
 
     [Header("Abilities")]
     public bool canRun = true;
+    public bool IsRunning { get; private set; }
+    public KeyCode runningKey = KeyCode.LeftShift;
+
     public bool canJump = true;
     public bool canDoubleJump = false;
     public bool canDash = false;
@@ -51,8 +54,11 @@ public class FirstPersonMovement : MonoBehaviour
     private float fallTimer = 0f;
     private Rigidbody rb;
 
-    public bool IsRunning { get; private set; }
     public bool IsDashing { get; set; }
+    /// <summary>
+    /// Functions to override movement speed (last added wins)
+    /// </summary>
+    public List<System.Func<float>> speedOverrides = new();
 
     public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
 
@@ -60,6 +66,11 @@ public class FirstPersonMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
+        // Paramètres physiques conseillés
+        rb.freezeRotation = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // Capacités de base
         canDoubleJump = false;
         canDash = false;
         canGlide = false;
@@ -71,18 +82,36 @@ public class FirstPersonMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        HandleMovement();
+    }
+
+    void HandleMovement()
+    {
+        // Bloque le mouvement pendant le dash
         if (IsDashing)
             return;
 
         IsRunning = canRun && Input.GetKey(runningKey);
         float targetSpeed = IsRunning ? runSpeed : speed;
-
         if (speedOverrides.Count > 0)
-            targetSpeed = speedOverrides[speedOverrides.Count - 1]();
+            targetSpeed = speedOverrides[^1]();
 
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
 
+        Vector3 inputDir = new Vector3(h, 0f, v);
+        if (inputDir.sqrMagnitude > 1f)
+            inputDir.Normalize();
+
+        Vector3 moveDir = transform.TransformDirection(inputDir);
+        Vector3 desiredVelocity = moveDir * targetSpeed;
+
+        // Vitesse horizontale actuelle
+        Vector3 currentHorizontalVelocity = new Vector3(
+            rb.linearVelocity.x,
+            0f,
+            rb.linearVelocity.z
+        );
         // Mouvement horizontal
         Vector3 horizontalVelocity = transform.rotation * new Vector3(x * targetSpeed, 0f, z * targetSpeed);
 
@@ -102,6 +131,14 @@ public class FirstPersonMovement : MonoBehaviour
                 TriggerFallImpact();
             fallTimer = 0f;
         }
+        // Différence à corriger
+        Vector3 velocityChange = desiredVelocity - currentHorizontalVelocity;
+
+        // Contrôle réduit en l'air
+        if (!IsGrounded())
+            velocityChange *= airControlMultiplier;
+
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
 
     void Update()
@@ -170,6 +207,28 @@ public class FirstPersonMovement : MonoBehaviour
             if (hit.CompareTag("Breakable") && canBreakShield)
                 Destroy(hit.gameObject);
         }
+    }
+
+    bool IsGrounded()
+    {
+        // Simple check, à remplacer par ton GroundCheck si besoin
+        return Physics.Raycast(
+            transform.position,
+            Vector3.down,
+            1.1f
+        );
+    }
+
+    public void Stun(float time)
+    {
+        StartCoroutine(StunCoroutine(time));
+    }
+
+    IEnumerator StunCoroutine(float time)
+    {
+        canRun = false;
+        yield return new WaitForSeconds(time);
+        canRun = true;
     }
 
     public Rigidbody Rigidbody => rb;

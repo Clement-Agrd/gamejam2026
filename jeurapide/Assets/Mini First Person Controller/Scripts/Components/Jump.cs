@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(FirstPersonMovement))]
@@ -13,8 +14,8 @@ public class Jump : MonoBehaviour
     [SerializeField]
     GroundCheck groundCheck;
 
-    private int jumpCount = 0;
-    private int maxJumps = 1;
+    public int jumpCount = 0;
+    public int maxJumps = 1;
 
     void Awake()
     {
@@ -51,6 +52,16 @@ public class Jump : MonoBehaviour
             PerformJump();
         }
     }
+    IEnumerator ConfirmJump()
+    {
+        yield return new WaitForFixedUpdate();
+
+        if (Mathf.Abs(rb.linearVelocity.y) > 0.1f)
+        {
+            jumpCount++;
+        }
+    }
+
 
     void PerformJump()
     {
@@ -59,8 +70,9 @@ public class Jump : MonoBehaviour
         rb.linearVelocity = velocity;
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        jumpCount++;
+        StartCoroutine(ConfirmJump());
     }
+
 
     void OnGrounded()
     {

@@ -26,4 +26,13 @@ public class LevelButton : MonoBehaviour
         
         SceneManager.LoadScene(nomScene);
     }
+    public void ActualiserBouton()
+    {
+        bool debloque = LevelProgression.EstDebloque(numeroNiveau);
+        button.interactable = debloque;
+
+        if (lockIcon != null)
+            lockIcon.SetActive(!debloque);
+    }
+
 }
