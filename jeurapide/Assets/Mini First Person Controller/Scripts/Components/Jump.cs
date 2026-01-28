@@ -8,42 +8,43 @@ public class Jump : MonoBehaviour
     FirstPersonMovement player;
 
     [Header("Jump Settings")]
-    public float jumpStrength = 2f;
+    public float jumpForce = 5f;
 
-    [SerializeField, Tooltip("Ground check to detect if player is on ground")]
+    [SerializeField]
     GroundCheck groundCheck;
 
-    public int jumpCount = 0;   // Compteur de sauts
-    public int maxJumps = 1;    // Sauts max autorisés
-    private float jumpCooldown = 0.1f;
-    private float lastJumpTime;
+    private int jumpCount = 0;
+    private int maxJumps = 1;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         player = GetComponent<FirstPersonMovement>();
 
-        if (player == null)
-            Debug.LogError("[Jump] FirstPersonMovement introuvable !");
-
         if (groundCheck == null)
             groundCheck = GetComponentInChildren<GroundCheck>();
 
-        // ✅ Assurer que le player commence sans double jump
+        // État initial sans capacités
         player.canDoubleJump = false;
         player.canDash = false;
         player.canGlide = false;
     }
 
+    void OnEnable()
+    {
+        if (groundCheck != null)
+            groundCheck.Grounded += OnGrounded;
+    }
+
+    void OnDisable()
+    {
+        if (groundCheck != null)
+            groundCheck.Grounded -= OnGrounded;
+    }
 
     void Update()
     {
-        if (groundCheck != null && groundCheck.isGrounded && Time.time - lastJumpTime > jumpCooldown)
-        {
-            jumpCount = 0;
-        }
-
-        maxJumps = (player != null && player.canDoubleJump) ? 2 : 1;
+        maxJumps = player.canDoubleJump ? 2 : 1;
 
         if (Input.GetButtonDown("Jump") && jumpCount < maxJumps)
         {
@@ -51,14 +52,18 @@ public class Jump : MonoBehaviour
         }
     }
 
-    private void PerformJump()
+    void PerformJump()
     {
         Vector3 velocity = rb.linearVelocity;
         velocity.y = 0f;
         rb.linearVelocity = velocity;
 
-        rb.AddForce(Vector3.up * 100f * jumpStrength);
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         jumpCount++;
-        lastJumpTime = Time.time; // ← on met à jour le cooldown
+    }
+
+    void OnGrounded()
+    {
+        jumpCount = 0;
     }
 }
