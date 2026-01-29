@@ -6,9 +6,9 @@ TagManager:
   tags:
   - Enemy
   - FirstPersonMovement.enemyLayer
-  tags:
   - WallRunnable
   - traversableWall
+  - Breakable
   layers:
   - Default
   - TransparentFX

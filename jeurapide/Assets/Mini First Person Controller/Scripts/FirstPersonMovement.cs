@@ -5,9 +5,19 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class FirstPersonMovement : MonoBehaviour
 {
+    [Header("Advanced Movement Feel")]
+    public float groundAcceleration = 40f;
+    public float airAcceleration = 15f;
+    public float maxAirSpeed = 12f;
+
+    [Header("Better Gravity")]
+    public float fallGravityMultiplier = 2.5f;
+    public float lowJumpGravityMultiplier = 2f;
+
     [Header("Movement")]
-    public float speed = 5f;
-    public float runSpeed = 9f;
+    public float speed = 7f;
+    public float runSpeed = 12f;
+    
     [Header("Air Control")]
     public float airControlMultiplier = 0.5f;
     public float airControlRecoveryTime = 1f;
@@ -63,7 +73,6 @@ public class FirstPersonMovement : MonoBehaviour
     /// <summary>
     /// Functions to override movement speed (last added wins)
     /// </summary>
-    public List<System.Func<float>> speedOverrides = new();
 
     public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
 
@@ -93,12 +102,20 @@ public class FirstPersonMovement : MonoBehaviour
 
     void HandleMovement()
     {
-        // Bloque le mouvement pendant le dash
         if (IsDashing)
             return;
+        
+        // Timer chute
+        if (!isGrounded) 
+            fallTimer += Time.fixedDeltaTime;
+        else
+        {
+            if (enableFallingImpact && fallTimer >= fallImpactTime) TriggerFallImpact(); fallTimer = 0f;
+        }
 
         IsRunning = canRun && Input.GetKey(runningKey);
         float targetSpeed = IsRunning ? runSpeed : speed;
+
         if (speedOverrides.Count > 0)
             targetSpeed = speedOverrides[^1]();
 
@@ -112,41 +129,52 @@ public class FirstPersonMovement : MonoBehaviour
         Vector3 moveDir = transform.TransformDirection(inputDir);
         Vector3 desiredVelocity = moveDir * targetSpeed;
 
-        // Vitesse horizontale actuelle
         Vector3 currentHorizontalVelocity = new Vector3(
             rb.linearVelocity.x,
             0f,
             rb.linearVelocity.z
         );
-        // Mouvement horizontal
-        Vector3 horizontalVelocity = transform.rotation * new Vector3(x * targetSpeed, 0f, z * targetSpeed);
 
-        // Gravité personnalisée (Oni lourd)
-        if (gravityMultiplier > 1f)
-            rb.AddForce(Vector3.down * 9.81f * (gravityMultiplier - 1f), ForceMode.Acceleration);
+        Vector3 velocityDiff = desiredVelocity - currentHorizontalVelocity;
 
-        // Applique horizontal + vertical (y conservée pour gravité)
-        rb.linearVelocity = new Vector3(horizontalVelocity.x, rb.linearVelocity.y, horizontalVelocity.z);
+        // Accélération différente sol / air
+        float accel = IsGrounded() ? groundAcceleration : airAcceleration;
 
-        // Timer chute
-        if (!isGrounded)
-            fallTimer += Time.fixedDeltaTime;
-        else
-        {
-            if (enableFallingImpact && fallTimer >= fallImpactTime)
-                TriggerFallImpact();
-            fallTimer = 0f;
-        }
-        // Différence à corriger
-        Vector3 velocityChange = desiredVelocity - currentHorizontalVelocity;
-
-        // 🔒 AIR CONTROL LOCK (après wall jump)
+        // Limite la conservation de vitesse en l’air
         if (!IsGrounded())
-            velocityChange *= currentAirControl;
+        {
+            velocityDiff = Vector3.ClampMagnitude(velocityDiff, maxAirSpeed);
+            velocityDiff *= currentAirControl;
+        }
+        
+        rb.AddForce(velocityDiff * accel * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
-        rb.AddForce(velocityChange, ForceMode.VelocityChange);
-
+        ApplyBetterGravity();
     }
+    void ApplyBetterGravity()
+    {
+        float baseGravity = 9.81f * gravityMultiplier;
+
+        if (rb.linearVelocity.y < 0)
+        {
+            // Chute rapide + Oni lourd
+            rb.AddForce(
+                Vector3.down * baseGravity * (fallGravityMultiplier - 1f),
+                ForceMode.Acceleration
+            );
+        }
+        else if (rb.linearVelocity.y > 0 && !Input.GetKey(KeyCode.Space) || !canJump)
+        {
+            // Petit saut + Oni lourd
+            rb.AddForce(
+                Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f),
+                ForceMode.Acceleration
+            );
+        }
+    }
+
+
+
 
     void Update()
     {
@@ -154,7 +182,7 @@ public class FirstPersonMovement : MonoBehaviour
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f);
 
         // Attaque Oni
-        if (canAttack && enableFallingImpact && Input.GetMouseButtonDown(0))
+        if (canAttack && Input.GetMouseButtonDown(0))
             Attack();
     }
 
@@ -269,19 +297,6 @@ public class FirstPersonMovement : MonoBehaviour
 
         currentAirControl = end;
         airControlCoroutine = null;
-    }
-    
-
-    public void Stun(float time)
-    {
-        StartCoroutine(StunCoroutine(time));
-    }
-
-    private IEnumerator StunCoroutine(float time)
-    {
-        canRun = false;
-        yield return new WaitForSeconds(time);
-        canRun = true;
     }
 
     // Visualisation dans l’éditeur

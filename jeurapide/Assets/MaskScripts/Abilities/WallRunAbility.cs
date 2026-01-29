@@ -6,10 +6,12 @@ using UnityEngine;
 public class WallRunAbility : MonoBehaviour
 {
     [Header("Wall Run")]
-    public float wallRunForce = 8f;
     public float wallCheckDistance = 0.7f;
     public string wallTag = "WallRunnable";
-    float lockedY;
+
+    [Header("Wall Run Speed")]
+    public float wallRunSpeedMultiplier = 1.4f;
+    public float maxWallRunSpeed = 12f;
 
     [Header("Wall Jump")]
     public float wallJumpUpRatio = 1f;
@@ -28,6 +30,7 @@ public class WallRunAbility : MonoBehaviour
 
     Vector3 wallNormal;
     bool isTouchingWall;
+    float lockedY;
 
     void Awake()
     {
@@ -43,21 +46,15 @@ public class WallRunAbility : MonoBehaviour
         CheckForWall();
 
         if (CanWallRun())
-        {
             StartWallRun();
-        }
         else if (player.IsWallRunning)
-        {
             StopWallRun();
-        }
     }
 
     void Update()
     {
         if (player.IsWallRunning && Input.GetKeyDown(jumpKey))
-        {
             WallJump();
-        }
     }
 
     // ---------------- WALL CHECK ------------------
@@ -67,13 +64,13 @@ public class WallRunAbility : MonoBehaviour
         isTouchingWall = false;
         RaycastHit hit;
 
-        // droite
+        // Droite
         if (Physics.Raycast(transform.position, transform.right, out hit, wallCheckDistance))
         {
             if (hit.collider.CompareTag(wallTag))
                 SetWall(hit);
         }
-        // gauche
+        // Gauche
         else if (Physics.Raycast(transform.position, -transform.right, out hit, wallCheckDistance))
         {
             if (hit.collider.CompareTag(wallTag))
@@ -109,13 +106,27 @@ public class WallRunAbility : MonoBehaviour
 
         player.IsWallRunning = true;
 
-        // Verrouillage hauteur
+        // Verrouille la hauteur
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.MovePosition(new Vector3(rb.position.x, lockedY, rb.position.z));
 
-        // Force le long du mur
-        Vector3 forwardForce = Vector3.ProjectOnPlane(transform.forward, wallNormal);
-        rb.AddForce(forwardForce.normalized * wallRunForce, ForceMode.Acceleration);
+        // Direction le long du mur
+        Vector3 wallForward = Vector3.ProjectOnPlane(transform.forward, wallNormal).normalized;
+
+        // Vitesse actuelle sur le mur
+        float currentSpeed = Vector3.Dot(rb.linearVelocity, wallForward);
+
+        // Vitesse cible boostée
+        float baseSpeed = player.IsRunning ? player.runSpeed : player.speed;
+        float targetSpeed = baseSpeed * wallRunSpeedMultiplier;
+        targetSpeed = Mathf.Min(targetSpeed, maxWallRunSpeed);
+
+        // Applique uniquement le delta
+        float speedDelta = targetSpeed - currentSpeed;
+        if (speedDelta > 0f)
+        {
+            rb.AddForce(wallForward * speedDelta, ForceMode.VelocityChange);
+        }
     }
 
     void StopWallRun()
@@ -129,21 +140,24 @@ public class WallRunAbility : MonoBehaviour
     {
         player.IsWallRunning = false;
 
-        // Réinitialise la vélocité
+        // Reset velocity
         rb.linearVelocity = Vector3.zero;
 
-        // Détermine la direction du wall jump
-        Vector3 jumpDir = Vector3.up * wallJumpUpRatio + (wallNormal) * wallJumpSideRatio;
-        jumpDir = jumpDir.normalized;
+        // Direction du jump
+        Vector3 jumpDir =
+            Vector3.up * wallJumpUpRatio +
+            wallNormal * wallJumpSideRatio;
 
-        // Applique l'impulsion
+        jumpDir.Normalize();
+
+        // Impulsion
         rb.AddForce(jumpDir * wallJumpForce, ForceMode.Impulse);
 
-        // Reset air control proprement
+        // Air control recovery
         player.StartAirControlRecovery(airControlLockTime);
     }
 
-    // ---------------- IS GROUNDED ------------------
+    // ---------------- GROUND CHECK ------------------
 
     bool IsGrounded()
     {
