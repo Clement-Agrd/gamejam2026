@@ -21,6 +21,7 @@ public class FirstPersonMovement : MonoBehaviour
     public bool canGlide = false;
     public bool canFight = true;
     public bool canSeeInvisible = false;
+    public bool canPassThruWall = false;
     public bool canPhase = false;
     public bool canBreakShield = false;
 
