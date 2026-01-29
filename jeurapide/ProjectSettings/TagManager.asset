@@ -3,16 +3,18 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Enemy
+  - FirstPersonMovement.enemyLayer
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ennemi
+  - Breakable
   - Water
   - UI
   - Obstacle Layer
-  - 
+  - Enemy
   - 
   - 
   - 

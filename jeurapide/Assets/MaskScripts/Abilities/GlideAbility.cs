@@ -60,14 +60,14 @@ public class GlideAbility : MonoBehaviour
 
     private void ApplyGlide()
     {
-        Vector3 velocity = rb.velocity;
+        Vector3 velocity = rb.linearVelocity;
 
         if (velocity.y < maxFallSpeed)
         {
             velocity.y = maxFallSpeed;
         }
 
-        rb.velocity = velocity;
+        rb.linearVelocity = velocity;
 
         Vector3 reducedGravity = Physics.gravity * glideGravityMultiplier;
         rb.AddForce(-reducedGravity * rb.mass, ForceMode.Force);
