@@ -4,13 +4,15 @@ public class KitsuneMask : Mask
     {
         player.canFight = false;
         player.canSeeInvisible = true;
-        player.canPhase = true;
+        player.canPassThruWall = true;
+        player.canWallRun = true;
     }
 
     public override void Deactivate()
     {
         player.canFight = true;
         player.canSeeInvisible = false;
-        player.canPhase = false;
+        player.canPassThruWall = false;
+        player.canWallRun = false;
     }
 }

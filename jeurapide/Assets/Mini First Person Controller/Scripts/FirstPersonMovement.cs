@@ -8,7 +8,10 @@ public class FirstPersonMovement : MonoBehaviour
     [Header("Movement")]
     public float speed = 5f;
     public float runSpeed = 9f;
+    [Header("Air Control")]
     public float airControlMultiplier = 0.5f;
+    public float airControlRecoveryTime = 1f;
+    public float currentAirControl;
 
     [Header("Abilities")]
     public bool canRun = true;
@@ -22,7 +25,8 @@ public class FirstPersonMovement : MonoBehaviour
     public bool canFight = true;
     public bool canSeeInvisible = false;
     public bool canPassThruWall = false;
-    public bool canPhase = false;
+    public bool canWallRun;
+    public bool IsWallRunning { get; set; }
     public bool canBreakShield = false;
 
     [Header("Combat Stats")]
@@ -70,6 +74,7 @@ public class FirstPersonMovement : MonoBehaviour
         // Paramètres physiques conseillés
         rb.freezeRotation = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        currentAirControl = airControlMultiplier;
 
         // Capacités de base
         canDoubleJump = false;
@@ -135,11 +140,12 @@ public class FirstPersonMovement : MonoBehaviour
         // Différence à corriger
         Vector3 velocityChange = desiredVelocity - currentHorizontalVelocity;
 
-        // Contrôle réduit en l'air
+        // 🔒 AIR CONTROL LOCK (après wall jump)
         if (!IsGrounded())
-            velocityChange *= airControlMultiplier;
+            velocityChange *= currentAirControl;
 
         rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
     }
 
     void Update()
@@ -233,6 +239,38 @@ public class FirstPersonMovement : MonoBehaviour
     }
 
     public Rigidbody Rigidbody => rb;
+    
+    [HideInInspector] public Coroutine airControlCoroutine;
+
+    public void StartAirControlRecovery(float recoveryTime)
+    {
+        if (airControlCoroutine != null)
+        {
+            StopCoroutine(airControlCoroutine);
+            airControlCoroutine = null;
+        }
+
+        currentAirControl = 0f;
+        airControlCoroutine = StartCoroutine(RestoreAirControlSmooth(recoveryTime));
+    }
+
+    IEnumerator RestoreAirControlSmooth(float recoveryTime)
+    {
+        float t = 0f;
+        float start = 0f;
+        float end = airControlMultiplier;
+
+        while (t < recoveryTime)
+        {
+            t += Time.deltaTime;
+            currentAirControl = Mathf.Lerp(start, end, t / recoveryTime);
+            yield return null;
+        }
+
+        currentAirControl = end;
+        airControlCoroutine = null;
+    }
+    
 
     public void Stun(float time)
     {
