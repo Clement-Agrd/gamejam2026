@@ -5,126 +5,156 @@ using UnityEngine;
 [RequireComponent(typeof(FirstPersonMovement))]
 public class PassThruWallAbility : MonoBehaviour
 {
-    public string passThruTag = "traversableWall";
+    [Header("Tags")]
+    public string traversableTag = "traversableWall";
+    public string becameSolideTag = "becameSolide";
 
-    [Header("Detection settings")]
+    [Header("Detection")]
     public Vector3 boxHalfExtents = new Vector3(0.5f, 1f, 0.5f);
     public LayerMask wallLayer;
 
     [Header("Visual feedback")]
-    [Range(0f, 1f)]
-    public float transparentAlpha = 0.4f;
+    [Range(0f, 1f)] public float traversableAlpha = 0.4f;
+    [Range(0f, 1f)] public float becameSolideAlpha = 0.3f;
 
     private Collider playerCollider;
     private FirstPersonMovement player;
 
+    // Traversable walls
     private HashSet<Collider> ignoredColliders = new HashSet<Collider>();
-    private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
+    private Dictionary<Renderer, Color> traversableOriginalColors = new Dictionary<Renderer, Color>();
+
+    // Became solid walls
+    private HashSet<Collider> solidColliders = new HashSet<Collider>();
+    private Dictionary<Renderer, Color> solidOriginalColors = new Dictionary<Renderer, Color>();
 
     void Awake()
     {
         playerCollider = GetComponent<Collider>();
         player = GetComponent<FirstPersonMovement>();
+
+        if (player == null)
+            Debug.LogError("PassThruWallAbility requires FirstPersonMovement!");
     }
 
     void FixedUpdate()
     {
         if (!player.canPassThruWall)
         {
-            RestoreAllCollisions();
-            RestoreAllVisuals();
-            return;
+            // Ability OFF
+            RestoreTraversableWalls();      // murs normaux redeviennent solides
+            DetectBecameSolideWalls();      // BecameSolid deviennent traversables
         }
-
-        DetectWallsAndIgnoreCollisions();
-        CleanupIgnoredColliders();
+        else
+        {
+            // Ability ON
+            DetectTraversableWalls();       // murs normaux deviennent traversables
+            RestoreBecameSolideWalls();     // BecameSolid redeviennent solides
+        }
     }
 
-    void DetectWallsAndIgnoreCollisions()
+    // =========================
+    // TRAVERSABLE WALLS
+    // =========================
+
+    void DetectTraversableWalls()
     {
         Collider[] hits = Physics.OverlapBox(transform.position, boxHalfExtents, transform.rotation, wallLayer);
 
         foreach (var hit in hits)
         {
-            if (!hit.CompareTag(passThruTag))
+            if (!hit.CompareTag(traversableTag))
                 continue;
 
             if (!ignoredColliders.Contains(hit))
             {
-                Physics.IgnoreCollision(playerCollider, hit, true);
+                Physics.IgnoreCollision(playerCollider, hit, true); // devient traversable
                 ignoredColliders.Add(hit);
-                ApplyTransparency(hit);
+                ApplyTransparency(hit, traversableAlpha, traversableOriginalColors);
             }
         }
     }
 
-    void CleanupIgnoredColliders()
-    {
-        var temp = new HashSet<Collider>(ignoredColliders);
-
-        foreach (var col in temp)
-        {
-            if (col == null)
-            {
-                ignoredColliders.Remove(col);
-                continue;
-            }
-
-            if (!Physics.CheckBox(transform.position, boxHalfExtents, transform.rotation, wallLayer))
-            {
-                Physics.IgnoreCollision(playerCollider, col, false);
-                RestoreTransparency(col);
-                ignoredColliders.Remove(col);
-            }
-        }
-    }
-
-    void RestoreAllCollisions()
+    void RestoreTraversableWalls()
     {
         foreach (var col in ignoredColliders)
         {
             if (col != null)
-                Physics.IgnoreCollision(playerCollider, col, false);
+                Physics.IgnoreCollision(playerCollider, col, false); // redevient solide
         }
+
+        RestoreVisuals(traversableOriginalColors);
         ignoredColliders.Clear();
     }
 
-    // ===== VISUAL FEEDBACK =====
+    // =========================
+    // BECAME SOLIDE WALLS
+    // =========================
 
-    void ApplyTransparency(Collider col)
+    void DetectBecameSolideWalls()
     {
-        Renderer r = col.GetComponent<Renderer>();
-        if (r == null) return;
+        Collider[] hits = Physics.OverlapBox(transform.position, boxHalfExtents, transform.rotation, wallLayer);
 
-        if (!originalColors.ContainsKey(r))
-            originalColors[r] = r.material.color;
-
-        Color c = r.material.color;
-        c.a = transparentAlpha;
-        r.material.color = c;
-    }
-
-    void RestoreTransparency(Collider col)
-    {
-        Renderer r = col.GetComponent<Renderer>();
-        if (r == null) return;
-
-        if (originalColors.TryGetValue(r, out Color original))
+        foreach (var hit in hits)
         {
-            r.material.color = original;
-            originalColors.Remove(r);
+            if (!hit.CompareTag(becameSolideTag))
+                continue;
+
+            if (!solidColliders.Contains(hit))
+            {
+                Physics.IgnoreCollision(playerCollider, hit, true); // devient traversable
+                solidColliders.Add(hit);
+                ApplyTransparency(hit, becameSolideAlpha, solidOriginalColors);
+            }
         }
     }
 
-    void RestoreAllVisuals()
+    void RestoreBecameSolideWalls()
     {
-        foreach (var pair in originalColors)
+        foreach (var col in solidColliders)
+        {
+            if (col != null)
+                Physics.IgnoreCollision(playerCollider, col, false); // redevient solide
+        }
+
+        RestoreVisuals(solidOriginalColors);
+        solidColliders.Clear();
+    }
+
+    // =========================
+    // VISUAL HELPERS
+    // =========================
+
+    void ApplyTransparency(Collider col, float alpha, Dictionary<Renderer, Color> colorCache)
+    {
+        Renderer r = col.GetComponent<Renderer>();
+        if (r == null) return;
+
+        if (!colorCache.ContainsKey(r))
+        {
+            r.material = new Material(r.material); // clone material
+            colorCache[r] = r.material.color;
+        }
+
+        Color c = r.material.color;
+        c.a = alpha;
+        r.material.color = c;
+    }
+
+    void RestoreVisuals(Dictionary<Renderer, Color> colorCache)
+    {
+        foreach (var pair in colorCache)
         {
             if (pair.Key != null)
                 pair.Key.material.color = pair.Value;
         }
-        originalColors.Clear();
+
+        colorCache.Clear();
     }
+
+    // =========================
+    // DEBUG GIZMOS
+    // =========================
 
     void OnDrawGizmosSelected()
     {

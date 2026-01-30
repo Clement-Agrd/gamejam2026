@@ -9,6 +9,7 @@ TagManager:
   - WallRunnable
   - traversableWall
   - Breakable
+  - becameSolide
   layers:
   - Default
   - TransparentFX
