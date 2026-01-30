@@ -15,6 +15,7 @@ public class OptionsMenu : MonoBehaviour
     {
         // Sensibilité
         sensibiliteSlider.value = PlayerPrefs.GetFloat("SensibiliteSouris", 2f);
+        Time.timeScale = 1f;
 
         panelOptions.SetActive(false);
     }
@@ -36,25 +37,18 @@ public class OptionsMenu : MonoBehaviour
                 OuvrirMenu();
         }
     }
-
     public void OuvrirMenu()
     {
+        Cursor.lockState = CursorLockMode.None;
         panelOptions.SetActive(true);
         Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-
     public void FermerMenu()
     {
-        panelOptions.SetActive(false);
-        Time.timeScale = 1f;
-    }
-    public void FermerMenuN()
-    {
-        panelOptions.SetActive(false);
-        Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
+        panelOptions.SetActive(false);
+        Time.timeScale = 1f;
         Cursor.visible = false;
     }
 }

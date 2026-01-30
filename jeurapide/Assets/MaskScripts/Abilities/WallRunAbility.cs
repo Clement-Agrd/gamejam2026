@@ -6,8 +6,11 @@ using UnityEngine;
 public class WallRunAbility : MonoBehaviour
 {
     [Header("Wall Run")]
-    public float wallCheckDistance = 0.7f;
+    public float wallCheckDistance = 0.9f;
     public string wallTag = "WallRunnable";
+
+    [Header("Wall Run Conditions")]
+    public float minWallRunSpeed = 6f;
 
     [Header("Wall Run Speed")]
     public float wallRunSpeedMultiplier = 1.4f;
@@ -64,23 +67,43 @@ public class WallRunAbility : MonoBehaviour
         isTouchingWall = false;
         RaycastHit hit;
 
-        // Droite
-        if (Physics.Raycast(transform.position, transform.right, out hit, wallCheckDistance))
+        // Angles pour la détection en diagonale
+        float[] angles = { -45f, -25f, 0f, 25f, 45f };
+
+        // Côté droit
+        foreach (float angle in angles)
         {
-            if (hit.collider.CompareTag(wallTag))
-                SetWall(hit);
-        }
-        // Gauche
-        else if (Physics.Raycast(transform.position, -transform.right, out hit, wallCheckDistance))
-        {
-            if (hit.collider.CompareTag(wallTag))
-                SetWall(hit);
+            Vector3 dir = Quaternion.AngleAxis(angle, Vector3.up) * transform.right;
+
+            if (Physics.Raycast(transform.position, dir, out hit, wallCheckDistance))
+            {
+                if (hit.collider.CompareTag(wallTag))
+                {
+                    SetWall(hit);
+                    break;
+                }
+            }
+
+            if (showDebugRay)
+                Debug.DrawRay(transform.position, dir * wallCheckDistance, Color.blue);
         }
 
-        if (showDebugRay)
+        // Côté gauche
+        foreach (float angle in angles)
         {
-            Debug.DrawRay(transform.position, transform.right * wallCheckDistance, Color.blue);
-            Debug.DrawRay(transform.position, -transform.right * wallCheckDistance, Color.red);
+            Vector3 dir = Quaternion.AngleAxis(angle, Vector3.up) * -transform.right;
+
+            if (Physics.Raycast(transform.position, dir, out hit, wallCheckDistance))
+            {
+                if (hit.collider.CompareTag(wallTag))
+                {
+                    SetWall(hit);
+                    break;
+                }
+            }
+
+            if (showDebugRay)
+                Debug.DrawRay(transform.position, dir * wallCheckDistance, Color.red);
         }
     }
 
@@ -92,40 +115,51 @@ public class WallRunAbility : MonoBehaviour
 
     bool CanWallRun()
     {
+        float horizontalSpeed = new Vector3(
+            rb.linearVelocity.x,
+            0f,
+            rb.linearVelocity.z
+        ).magnitude;
+
         return isTouchingWall
             && !IsGrounded()
-            && rb.linearVelocity.y <= 0.1f;
+            && rb.linearVelocity.y <= 0.1f
+            && horizontalSpeed >= minWallRunSpeed;
     }
 
     // ---------------- WALL RUN ------------------
 
     void StartWallRun()
     {
+        // Première frame du wall run
         if (!player.IsWallRunning)
+        {
             lockedY = rb.position.y;
-
-        player.IsWallRunning = true;
-
-        // Verrouille la hauteur
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        rb.MovePosition(new Vector3(rb.position.x, lockedY, rb.position.z));
+            player.IsWallRunning = true;
+        }
 
         // Direction le long du mur
         Vector3 wallForward = Vector3.ProjectOnPlane(transform.forward, wallNormal).normalized;
 
-        // Vitesse actuelle sur le mur
-        float currentSpeed = Vector3.Dot(rb.linearVelocity, wallForward);
+        float v = Input.GetAxis("Vertical");
+        if (v <= 0f)
+            return;
 
-        // Vitesse cible boostée
-        float baseSpeed = player.IsRunning ? player.runSpeed : player.speed;
-        float targetSpeed = baseSpeed * wallRunSpeedMultiplier;
-        targetSpeed = Mathf.Min(targetSpeed, maxWallRunSpeed);
+        // Bonus uniquement si le joueur court
+        bool isRunning = player.IsRunning;
+        float speedMultiplier = isRunning ? wallRunSpeedMultiplier : 1f;
 
-        // Applique uniquement le delta
-        float speedDelta = targetSpeed - currentSpeed;
-        if (speedDelta > 0f)
+        Vector3 desiredVelocity = wallForward * v * player.speed * speedMultiplier;
+        desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxWallRunSpeed);
+
+        // Applique la vitesse sans auto-avance
+        rb.AddForce(desiredVelocity - rb.linearVelocity, ForceMode.Acceleration);
+
+        // Verrouillage vertical SEULEMENT si le joueur court
+        if (isRunning)
         {
-            rb.AddForce(wallForward * speedDelta, ForceMode.VelocityChange);
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            rb.MovePosition(new Vector3(rb.position.x, lockedY, rb.position.z));
         }
     }
 
@@ -140,20 +174,16 @@ public class WallRunAbility : MonoBehaviour
     {
         player.IsWallRunning = false;
 
-        // Reset velocity
         rb.linearVelocity = Vector3.zero;
 
-        // Direction du jump
         Vector3 jumpDir =
             Vector3.up * wallJumpUpRatio +
             wallNormal * wallJumpSideRatio;
 
         jumpDir.Normalize();
 
-        // Impulsion
         rb.AddForce(jumpDir * wallJumpForce, ForceMode.Impulse);
 
-        // Air control recovery
         player.StartAirControlRecovery(airControlLockTime);
     }
 

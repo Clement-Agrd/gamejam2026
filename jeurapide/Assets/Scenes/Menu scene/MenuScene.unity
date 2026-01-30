@@ -2272,6 +2272,7 @@ GameObject:
   - component: {fileID: 786974916}
   - component: {fileID: 786974915}
   - component: {fileID: 786974918}
+  - component: {fileID: 786974919}
   m_Layer: 0
   m_Name: MenuManager
   m_TagString: Untagged
@@ -2334,6 +2335,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelSelectMenu
   panelLevelSelect: {fileID: 1766610072}
+--- !u!114 &786974919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786974914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c94ede80e3e4e868f23ca5cffc37a72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LaSourisDisparaitPasStp
 --- !u!1 &804171559
 GameObject:
   m_ObjectHideFlags: 0
@@ -5694,7 +5707,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Controles
+  m_text: reset progression
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

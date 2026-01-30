@@ -157,9 +157,17 @@ public class FirstPersonMovement : MonoBehaviour
     }
     #endregion
 
-    #region Falling Impact
-    private void HandleFallingImpact() { }
+    void Update()
+    {
+        // Vérification sol
+        isGrounded = groundCheck.isGrounded;
 
+        // Attaque Oni
+        if (canAttack && Input.GetMouseButtonDown(0))
+            Attack();
+    }
+
+    // --- Impact de chute ---
     private void TriggerFallImpact()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, fallImpactRadius);

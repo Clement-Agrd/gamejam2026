@@ -8,20 +8,23 @@ public class PassThruWallAbility : MonoBehaviour
     public string passThruTag = "traversableWall";
 
     [Header("Detection settings")]
-    public Vector3 boxHalfExtents = new Vector3(0.5f, 1f, 0.5f); // Taille de la box autour du joueur
-    public LayerMask wallLayer; // Optionnel, pour filtrer les murs si besoin
+    public Vector3 boxHalfExtents = new Vector3(0.5f, 1f, 0.5f);
+    public LayerMask wallLayer;
+
+    [Header("Visual feedback")]
+    [Range(0f, 1f)]
+    public float transparentAlpha = 0.4f;
 
     private Collider playerCollider;
     private FirstPersonMovement player;
 
     private HashSet<Collider> ignoredColliders = new HashSet<Collider>();
+    private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
 
     void Awake()
     {
         playerCollider = GetComponent<Collider>();
         player = GetComponent<FirstPersonMovement>();
-        if (player == null)
-            Debug.LogError("PassThruWallAbility requires FirstPersonMovement on the same GameObject!");
     }
 
     void FixedUpdate()
@@ -29,6 +32,7 @@ public class PassThruWallAbility : MonoBehaviour
         if (!player.canPassThruWall)
         {
             RestoreAllCollisions();
+            RestoreAllVisuals();
             return;
         }
 
@@ -38,35 +42,38 @@ public class PassThruWallAbility : MonoBehaviour
 
     void DetectWallsAndIgnoreCollisions()
     {
-        // On détecte tous les colliders proches dans la box
         Collider[] hits = Physics.OverlapBox(transform.position, boxHalfExtents, transform.rotation, wallLayer);
 
         foreach (var hit in hits)
         {
-            if (hit.CompareTag(passThruTag) && !ignoredColliders.Contains(hit))
+            if (!hit.CompareTag(passThruTag))
+                continue;
+
+            if (!ignoredColliders.Contains(hit))
             {
                 Physics.IgnoreCollision(playerCollider, hit, true);
                 ignoredColliders.Add(hit);
+                ApplyTransparency(hit);
             }
         }
     }
 
     void CleanupIgnoredColliders()
     {
-        // On réactive les collisions si le mur n'est plus proche
         var temp = new HashSet<Collider>(ignoredColliders);
+
         foreach (var col in temp)
         {
-            if (col == null) 
+            if (col == null)
             {
                 ignoredColliders.Remove(col);
                 continue;
             }
 
-            // Vérifie si le mur est encore dans la zone
             if (!Physics.CheckBox(transform.position, boxHalfExtents, transform.rotation, wallLayer))
             {
                 Physics.IgnoreCollision(playerCollider, col, false);
+                RestoreTransparency(col);
                 ignoredColliders.Remove(col);
             }
         }
@@ -82,7 +89,43 @@ public class PassThruWallAbility : MonoBehaviour
         ignoredColliders.Clear();
     }
 
-    // Pour visualiser la box dans l'éditeur
+    // ===== VISUAL FEEDBACK =====
+
+    void ApplyTransparency(Collider col)
+    {
+        Renderer r = col.GetComponent<Renderer>();
+        if (r == null) return;
+
+        if (!originalColors.ContainsKey(r))
+            originalColors[r] = r.material.color;
+
+        Color c = r.material.color;
+        c.a = transparentAlpha;
+        r.material.color = c;
+    }
+
+    void RestoreTransparency(Collider col)
+    {
+        Renderer r = col.GetComponent<Renderer>();
+        if (r == null) return;
+
+        if (originalColors.TryGetValue(r, out Color original))
+        {
+            r.material.color = original;
+            originalColors.Remove(r);
+        }
+    }
+
+    void RestoreAllVisuals()
+    {
+        foreach (var pair in originalColors)
+        {
+            if (pair.Key != null)
+                pair.Key.material.color = pair.Value;
+        }
+        originalColors.Clear();
+    }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

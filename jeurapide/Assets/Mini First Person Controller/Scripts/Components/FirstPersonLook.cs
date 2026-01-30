@@ -25,17 +25,6 @@ public class FirstPersonLook : MonoBehaviour
 
     void Update()
     {
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            if (Cursor.lockState != CursorLockMode.Locked)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-
-        }
-
         // Bloque le look si le menu est ouvert
         if (Cursor.lockState != CursorLockMode.Locked)
             return;

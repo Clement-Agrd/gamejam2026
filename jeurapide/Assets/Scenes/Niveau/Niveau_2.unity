@@ -3252,7 +3252,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 716222812}
         m_TargetAssemblyTypeName: OptionsMenu, Assembly-CSharp
-        m_MethodName: FermerMenuN
+        m_MethodName: FermerMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
