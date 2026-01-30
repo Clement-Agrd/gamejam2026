@@ -10734,29 +10734,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3375816515838194898, guid: d610528b310e9cc4698438d25e4be026, type: 3}
-      propertyPath: minWallRunSpeed
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 3970138995919084695, guid: d610528b310e9cc4698438d25e4be026, type: 3}
       propertyPath: m_Name
       value: First Person Controller 1 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4636757982748456270, guid: d610528b310e9cc4698438d25e4be026, type: 3}
-      propertyPath: boxHalfExtents.x
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4636757982748456270, guid: d610528b310e9cc4698438d25e4be026, type: 3}
-      propertyPath: boxHalfExtents.y
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4636757982748456270, guid: d610528b310e9cc4698438d25e4be026, type: 3}
-      propertyPath: boxHalfExtents.z
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4649946006972699085, guid: d610528b310e9cc4698438d25e4be026, type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5492923736581969808, guid: d610528b310e9cc4698438d25e4be026, type: 3}
       propertyPath: m_LocalPosition.x

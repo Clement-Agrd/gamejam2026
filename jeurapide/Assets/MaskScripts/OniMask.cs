@@ -22,7 +22,6 @@ public class OniMask : Mask
         player.gravityMultiplier = oniGravityMultiplier;
 
         player.damageMultiplier = damageMultiplierValue;
-        player.damageReduction = damageReductionValue;
         player.canBreakShield = true;
 
         player.enableFallingImpact = true;
@@ -41,7 +40,6 @@ public class OniMask : Mask
         player.gravityMultiplier = 1f;
 
         player.damageMultiplier = 1f;
-        player.damageReduction = 0f;
         player.canBreakShield = false;
 
         player.enableFallingImpact = false;

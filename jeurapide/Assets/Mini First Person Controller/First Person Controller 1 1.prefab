@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7820973216266935461}
   - component: {fileID: 5366500000188802177}
   - component: {fileID: 1668288765663584254}
-  - component: {fileID: 1964506222315650245}
+  - component: {fileID: 624717585114449083}
   - component: {fileID: 1455552324952853687}
   - component: {fileID: 3543679774764130830}
   - component: {fileID: 5907080685412691626}
@@ -38,7 +38,7 @@ Transform:
   m_GameObject: {fileID: 3970138995919084695}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.27, y: 17.92, z: -8.2}
+  m_LocalPosition: {x: -11.56835, y: 14.26, z: 200.97656}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -111,18 +111,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   groundCheck: {fileID: 0}
+  speed: 7
+  runSpeed: 12
+  runningKey: 304
   groundAcceleration: 45
   airAcceleration: 15
   maxAirSpeed: 16
+  gravityMultiplier: 1
   fallGravityMultiplier: 4
   lowJumpGravityMultiplier: 3
-  speed: 7
-  runSpeed: 12
   airControlMultiplier: 0.7
   airControlRecoveryTime: 3
   currentAirControl: 0
   canRun: 1
-  runningKey: 304
   canJump: 1
   canDoubleJump: 0
   canDash: 0
@@ -132,25 +133,25 @@ MonoBehaviour:
   canPassThruWall: 0
   canWallRun: 0
   canBreakShield: 0
+  canAttack: 1
   damageMultiplier: 1
   damageReduction: 0
-  gravityMultiplier: 1
+  attackDamage: 100
   enableFallingImpact: 0
   fallImpactTime: 0.2
   fallImpactRadius: 3
   fallImpactDamage: 100
-  canAttack: 1
-  attackRange: 2
-  attackDamage: 100
+  massue: {fileID: 6829624168502987221}
+  weaponPivot: {fileID: 867628336939450997}
+  swingAngle: 120
+  swingDuration: 0.3
+  attackCooldown: 0.6
+  hitDistance: 1.5
+  hitRadius: 1.2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 136
-  animator: {fileID: 0}
-  massue: {fileID: 6829624168502987221}
-  attackClip1: {fileID: -4924132671597429539, guid: d31d54ec7b58d264684fb37bcd0a941c, type: 3}
-  attackClip2: {fileID: 5630166771594268385, guid: d31d54ec7b58d264684fb37bcd0a941c, type: 3}
   isGrounded: 1
-  fallTimer: 0
 --- !u!114 &1668288765663584254
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,7 +168,7 @@ MonoBehaviour:
   groundCheck: {fileID: 4284653772203276364}
   jumpCount: 0
   maxJumps: 1
---- !u!114 &1964506222315650245
+--- !u!114 &624717585114449083
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,15 +177,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 3970138995919084695}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27b67ddb3d23b8340b125aede56d7e8c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e244a734cae2624c80a21e75ef8b505, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  key: 306
-  movement: {fileID: 5366500000188802177}
-  movementSpeed: 2
-  headToLower: {fileID: 3687912176469892219}
-  crouchYHeadPosition: 1
-  colliderToLower: {fileID: 5768376743230521575}
+  m_EditorClassIdentifier: Assembly-CSharp::OniWeaponHitbox
+  player: {fileID: 0}
+  radius: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 136
 --- !u!114 &1455552324952853687
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,11 +228,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OniMask
   speedMultiplier: 0.5
   oniGravityMultiplier: 5
-  damageMultiplierValue: 2
+  damageMultiplierValue: 5
   damageReductionValue: 0.5
-  fallImpactTimeValue: 1
+  fallImpactTimeValue: 0.1
   fallImpactRadiusValue: 3
-  fallImpactDamageValue: 50
+  fallImpactDamageValue: 100
 --- !u!114 &4973682760451130786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -261,7 +261,6 @@ MonoBehaviour:
   dashSpeed: 25
   dashCooldown: 1
   damage: 100
-  dashKey: 101
   cameraTransform: {fileID: 3687912176469892219}
   disableGravityDuringDash: 1
   enemyLayer:
@@ -300,7 +299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WallRunAbility
   wallCheckDistance: 1
   wallTag: WallRunnable
-  minWallRunSpeed: 6
+  minWallRunSpeed: 3
   wallRunSpeedMultiplier: 200
   maxWallRunSpeed: 200
   wallJumpUpRatio: 1
@@ -321,11 +320,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c5c4f17ef5e4a6ca80494168aa7c71e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PassThruWallAbility
-  passThruTag: traversableWall
-  boxHalfExtents: {x: 0.5, y: 1, z: 0.5}
+  traversableTag: traversableWall
+  becameSolideTag: becameSolide
+  boxHalfExtents: {x: 100, y: 100, z: 100}
   wallLayer:
     serializedVersion: 2
     m_Bits: 64
+  traversableAlpha: 0.4
+  becameSolideAlpha: 0.3
 --- !u!1 &5805923039317271721
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,6 +385,8 @@ GameObject:
   - component: {fileID: 5630931080584508192}
   - component: {fileID: 4557979322686493079}
   - component: {fileID: 1198406549870461551}
+  - component: {fileID: 1968277009946987652}
+  - component: {fileID: 5658693383644920017}
   m_Layer: 0
   m_Name: Gourdin
   m_TagString: Untagged
@@ -398,13 +402,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6829624168502987221}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.22734855, y: 0.37653947, z: -0.19977249, w: 0.8755693}
-  m_LocalPosition: {x: 0.59, y: 1.05, z: -0.01}
+  m_LocalRotation: {x: 0.49230903, y: 0.24689801, z: -0.21591322, w: 0.8062597}
+  m_LocalPosition: {x: 0.2, y: 1.1976194, z: 0.45587158}
   m_LocalScale: {x: 1.3462474, y: 1.3462476, z: 1.3462474}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 867628336939450997}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 64.221, y: 25.253, z: -13.98}
 --- !u!33 &4557979322686493079
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -463,6 +467,44 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &1968277009946987652
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6829624168502987221}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 136
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5752974, y: 0.69753706, z: 0.46950826}
+  m_Center: {x: -0.04221287, y: 0.2977597, z: -0.17552465}
+--- !u!114 &5658693383644920017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6829624168502987221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e244a734cae2624c80a21e75ef8b505, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OniWeaponHitbox
+  player: {fileID: 0}
+  radius: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 136
 --- !u!1 &7301433541334215505
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,7 +653,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8316363146393111203}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 780f90e951d635f439326ea715cd97e9, type: 3}
   m_Name: 

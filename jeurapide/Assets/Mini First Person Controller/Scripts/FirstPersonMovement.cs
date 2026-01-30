@@ -33,17 +33,14 @@ public class FirstPersonMovement : MonoBehaviour
     public bool canDoubleJump = false;
     public bool canDash = false;
     public bool canGlide = false;
-    public bool canFight = true;
-    public bool canSeeInvisible = false;
+    public bool canFight = false;
     public bool canPassThruWall = false;
     public bool canWallRun = false;
     public bool IsWallRunning { get; set; }
     public bool canBreakShield = false;
-    public bool canAttack = true;
 
     [Header("Combat Stats")]
     public float damageMultiplier = 1f;
-    public float damageReduction = 0f;
     public float attackDamage = 20f;
 
     [Header("Falling Impact")]
@@ -88,12 +85,13 @@ public class FirstPersonMovement : MonoBehaviour
         canGlide = false;
 
         if (massue != null)
-            massue.SetActive(true);   // La massue est visible et pivotée
+            massue.SetActive(false);   // La massue est visible et pivotée
     }
 
     void Update()
     {
-        isGrounded = groundCheck != null && groundCheck.isGrounded;
+        // Vérification sol
+        isGrounded = groundCheck.isGrounded;
 
         IsRunning = canRun && Input.GetKey(runningKey);
 
@@ -105,10 +103,9 @@ public class FirstPersonMovement : MonoBehaviour
     {
         HandleMovement();
         ApplyBetterGravity();
-        HandleFallingImpact();
     }
 
-    #region Movement
+
     private void HandleMovement()
     {
         if (IsDashing) return;
@@ -155,17 +152,7 @@ public class FirstPersonMovement : MonoBehaviour
         else if (rb.linearVelocity.y > 0 && (!Input.GetKey(KeyCode.Space) || !canJump))
             rb.AddForce(Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f), ForceMode.Acceleration);
     }
-    #endregion
-
-    void Update()
-    {
-        // Vérification sol
-        isGrounded = groundCheck.isGrounded;
-
-        // Attaque Oni
-        if (canAttack && Input.GetMouseButtonDown(0))
-            Attack();
-    }
+    
 
     // --- Impact de chute ---
     private void TriggerFallImpact()
@@ -184,9 +171,8 @@ public class FirstPersonMovement : MonoBehaviour
                 Destroy(hit.gameObject);
         }
     }
-    #endregion
 
-    #region Oni Swing Attack
+    
     private void TryAttack()
     {
         if (isAttacking) return;
@@ -235,9 +221,9 @@ public class FirstPersonMovement : MonoBehaviour
         weaponPivot.localRotation = Quaternion.identity;
         isAttacking = false;
     }
-    #endregion
 
-    #region Air Control Recovery
+
+
     public void StartAirControlRecovery(float recoveryTime)
     {
         if (airControlCoroutine != null)
@@ -263,7 +249,7 @@ public class FirstPersonMovement : MonoBehaviour
         currentAirControl = end;
         airControlCoroutine = null;
     }
-    #endregion
+
 
     public Rigidbody Rigidbody => rb;
 
