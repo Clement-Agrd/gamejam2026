@@ -11,7 +11,7 @@ public class OniMask : Mask
     public float damageMultiplierValue = 2f;    
     public float damageReductionValue = 0.5f;
 
-    public float fallImpactTimeValue = 1f;      // Durée chute pour impact
+    public float fallImpactTimeValue = 0.1f;      // Durée chute pour impact
     public float fallImpactRadiusValue = 3f;    // Rayon impact
     public float fallImpactDamageValue = 50f;   // Dégâts impact
 

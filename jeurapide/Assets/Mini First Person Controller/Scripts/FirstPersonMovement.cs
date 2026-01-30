@@ -5,6 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class FirstPersonMovement : MonoBehaviour
 {
+    [SerializeField]
+    GroundCheck groundCheck;
+    
     [Header("Advanced Movement Feel")]
     public float groundAcceleration = 40f;
     public float airAcceleration = 15f;
@@ -50,7 +53,8 @@ public class FirstPersonMovement : MonoBehaviour
     public bool enableFallingImpact = false; // activé uniquement par Oni
     public float fallImpactTime = 1f;       
     public float fallImpactRadius = 3f;     
-    public float fallImpactDamage = 50f;    
+    public float fallImpactDamage = 50f; 
+
 
     [Header("Combat / Massue Oni")]
     public bool canAttack = true;
@@ -66,7 +70,7 @@ public class FirstPersonMovement : MonoBehaviour
     [HideInInspector]
     public bool isGrounded = true;
 
-    private float fallTimer = 0f;
+    public float fallTimer = 0f;
     private Rigidbody rb;
 
     public bool IsDashing { get; set; }
@@ -79,6 +83,8 @@ public class FirstPersonMovement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        if (groundCheck == null)
+            groundCheck = GetComponentInChildren<GroundCheck>();
 
         // Paramètres physiques conseillés
         rb.freezeRotation = true;
@@ -106,11 +112,18 @@ public class FirstPersonMovement : MonoBehaviour
             return;
         
         // Timer chute
-        if (!isGrounded) 
+        if (!isGrounded)
+        {
             fallTimer += Time.fixedDeltaTime;
+        }
         else
         {
-            if (enableFallingImpact && fallTimer >= fallImpactTime) TriggerFallImpact(); fallTimer = 0f;
+            if (enableFallingImpact && fallTimer > fallImpactTime)
+            {
+                TriggerFallImpact();
+            }
+
+            fallTimer = 0f;
         }
 
         IsRunning = canRun && Input.GetKey(runningKey);
@@ -179,7 +192,7 @@ public class FirstPersonMovement : MonoBehaviour
     void Update()
     {
         // Vérification sol
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f);
+        isGrounded = groundCheck.isGrounded;
 
         // Attaque Oni
         if (canAttack && Input.GetMouseButtonDown(0))
@@ -189,7 +202,7 @@ public class FirstPersonMovement : MonoBehaviour
     // --- Impact de chute ---
     private void TriggerFallImpact()
     {
-        Debug.Log("[ONI] Impact de chute !");
+        Debug.Log("Feur");
 
         Collider[] hits = Physics.OverlapSphere(transform.position, fallImpactRadius);
 
