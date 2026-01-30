@@ -19029,7 +19029,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6464546730922226127, guid: 87701bd22b1c45b45972d65d27906001, type: 3}
       propertyPath: swingAngle
-      value: 62.5
+      value: 41.5
       objectReference: {fileID: 0}
     - target: {fileID: 6464546730922226127, guid: 87701bd22b1c45b45972d65d27906001, type: 3}
       propertyPath: fallImpactTime

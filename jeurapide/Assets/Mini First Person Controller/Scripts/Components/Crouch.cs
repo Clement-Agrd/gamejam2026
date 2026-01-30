@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 
 public class Crouch : MonoBehaviour
 {
@@ -141,3 +141,4 @@ public class Crouch : MonoBehaviour
     float SpeedOverride() => movementSpeed;
     #endregion
 }
+*/

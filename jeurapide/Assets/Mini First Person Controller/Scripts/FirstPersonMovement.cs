@@ -5,32 +5,30 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class FirstPersonMovement : MonoBehaviour
 {
-    [SerializeField]
-    GroundCheck groundCheck;
-    
-    [Header("Advanced Movement Feel")]
-    public float groundAcceleration = 40f;
-    public float airAcceleration = 15f;
-    public float maxAirSpeed = 12f;
-
-    [Header("Better Gravity")]
-    public float fallGravityMultiplier = 2.5f;
-    public float lowJumpGravityMultiplier = 2f;
+    [Header("Ground Check")]
+    [SerializeField] private GroundCheck groundCheck;
 
     [Header("Movement")]
     public float speed = 7f;
     public float runSpeed = 12f;
-    
+    public KeyCode runningKey = KeyCode.LeftShift;
+    public float groundAcceleration = 40f;
+    public float airAcceleration = 15f;
+    public float maxAirSpeed = 12f;
+
+    [Header("Gravity")]
+    public float gravityMultiplier = 1f;
+    public float fallGravityMultiplier = 2.5f;
+    public float lowJumpGravityMultiplier = 2f;
+
     [Header("Air Control")]
     public float airControlMultiplier = 0.5f;
     public float airControlRecoveryTime = 1f;
-    public float currentAirControl;
+    [HideInInspector] public float currentAirControl;
 
     [Header("Abilities")]
     public bool canRun = true;
     public bool IsRunning { get; private set; }
-    public KeyCode runningKey = KeyCode.LeftShift;
-
     public bool canJump = true;
     public bool canDoubleJump = false;
     public bool canDash = false;
@@ -38,47 +36,42 @@ public class FirstPersonMovement : MonoBehaviour
     public bool canFight = true;
     public bool canSeeInvisible = false;
     public bool canPassThruWall = false;
-    public bool canWallRun;
+    public bool canWallRun = false;
     public bool IsWallRunning { get; set; }
     public bool canBreakShield = false;
+    public bool canAttack = true;
 
     [Header("Combat Stats")]
     public float damageMultiplier = 1f;
     public float damageReduction = 0f;
-
-    [Header("Physics")]
-    public float gravityMultiplier = 1f;
+    public float attackDamage = 20f;
 
     [Header("Falling Impact")]
-    public bool enableFallingImpact = false; // activé uniquement par Oni
-    public float fallImpactTime = 1f;       
-    public float fallImpactRadius = 3f;     
-    public float fallImpactDamage = 50f; 
+    public bool enableFallingImpact = false;
+    public float fallImpactTime = 1f;
+    public float fallImpactRadius = 3f;
+    public float fallImpactDamage = 50f;
 
-
-    [Header("Combat / Massue Oni")]
-    public bool canAttack = true;
-    public float attackRange = 2f;
-    public float attackDamage = 20f;
+    [Header("Oni Weapon")]
+    public GameObject massue;               // Ton objet massue
+    public Transform weaponPivot;           // Empty GameObject pivot pour faire tourner la massue
+    public float swingAngle = 120f;         // Largeur du swing (droite à gauche)
+    public float swingDuration = 0.3f;
+    public float attackCooldown = 0.6f;
+    public float hitDistance = 1.5f;
+    public float hitRadius = 1.2f;
     public LayerMask enemyLayer;
-    public Animator animator;            
 
-    public GameObject massue;             // Massue visible uniquement Oni
-    public AnimationClip attackClip1;     
-    public AnimationClip attackClip2;     
+    [HideInInspector] public bool isGrounded = true;
 
-    [HideInInspector]
-    public bool isGrounded = true;
-
-    public float fallTimer = 0f;
     private Rigidbody rb;
-
+    private float fallTimer = 0f;
     public bool IsDashing { get; set; }
-    /// <summary>
-    /// Functions to override movement speed (last added wins)
-    /// </summary>
 
-    public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
+    private bool isAttacking = false;
+    private float lastAttackTime = -999f;
+
+    [HideInInspector] public Coroutine airControlCoroutine;
 
     void Awake()
     {
@@ -86,216 +79,167 @@ public class FirstPersonMovement : MonoBehaviour
         if (groundCheck == null)
             groundCheck = GetComponentInChildren<GroundCheck>();
 
-        // Paramètres physiques conseillés
         rb.freezeRotation = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         currentAirControl = airControlMultiplier;
 
-        // Capacités de base
         canDoubleJump = false;
         canDash = false;
         canGlide = false;
 
-        // Massue désactivée par défaut
         if (massue != null)
-            massue.SetActive(false);
+            massue.SetActive(true);   // La massue est visible et pivotée
+    }
+
+    void Update()
+    {
+        isGrounded = groundCheck != null && groundCheck.isGrounded;
+
+        IsRunning = canRun && Input.GetKey(runningKey);
+
+        if (canFight && Input.GetMouseButtonDown(0))
+            TryAttack();
     }
 
     void FixedUpdate()
     {
         HandleMovement();
+        ApplyBetterGravity();
+        HandleFallingImpact();
     }
 
-    void HandleMovement()
+    #region Movement
+    private void HandleMovement()
     {
-        if (IsDashing)
-            return;
-        
-        // Timer chute
-        if (!isGrounded)
-        {
-            fallTimer += Time.fixedDeltaTime;
-        }
+        if (IsDashing) return;
+
+        if (!isGrounded) fallTimer += Time.fixedDeltaTime;
         else
         {
             if (enableFallingImpact && fallTimer > fallImpactTime)
-            {
                 TriggerFallImpact();
-            }
-
             fallTimer = 0f;
         }
 
-        IsRunning = canRun && Input.GetKey(runningKey);
         float targetSpeed = IsRunning ? runSpeed : speed;
-
-        if (speedOverrides.Count > 0)
-            targetSpeed = speedOverrides[^1]();
 
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
         Vector3 inputDir = new Vector3(h, 0f, v);
-        if (inputDir.sqrMagnitude > 1f)
-            inputDir.Normalize();
+        if (inputDir.sqrMagnitude > 1f) inputDir.Normalize();
 
         Vector3 moveDir = transform.TransformDirection(inputDir);
         Vector3 desiredVelocity = moveDir * targetSpeed;
 
-        Vector3 currentHorizontalVelocity = new Vector3(
-            rb.linearVelocity.x,
-            0f,
-            rb.linearVelocity.z
-        );
-
+        Vector3 currentHorizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         Vector3 velocityDiff = desiredVelocity - currentHorizontalVelocity;
 
-        // Accélération différente sol / air
-        float accel = IsGrounded() ? groundAcceleration : airAcceleration;
+        float accel = isGrounded ? groundAcceleration : airAcceleration;
 
-        // Limite la conservation de vitesse en l’air
-        if (!IsGrounded())
+        if (!isGrounded)
         {
             velocityDiff = Vector3.ClampMagnitude(velocityDiff, maxAirSpeed);
             velocityDiff *= currentAirControl;
         }
-        
-        rb.AddForce(velocityDiff * accel * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
-        ApplyBetterGravity();
+        rb.AddForce(velocityDiff * accel * Time.fixedDeltaTime, ForceMode.VelocityChange);
     }
-    void ApplyBetterGravity()
+
+    private void ApplyBetterGravity()
     {
         float baseGravity = 9.81f * gravityMultiplier;
 
         if (rb.linearVelocity.y < 0)
-        {
-            // Chute rapide + Oni lourd
-            rb.AddForce(
-                Vector3.down * baseGravity * (fallGravityMultiplier - 1f),
-                ForceMode.Acceleration
-            );
-        }
-        else if (rb.linearVelocity.y > 0 && !Input.GetKey(KeyCode.Space) || !canJump)
-        {
-            // Petit saut + Oni lourd
-            rb.AddForce(
-                Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f),
-                ForceMode.Acceleration
-            );
-        }
+            rb.AddForce(Vector3.down * baseGravity * (fallGravityMultiplier - 1f), ForceMode.Acceleration);
+        else if (rb.linearVelocity.y > 0 && (!Input.GetKey(KeyCode.Space) || !canJump))
+            rb.AddForce(Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f), ForceMode.Acceleration);
     }
+    #endregion
 
+    #region Falling Impact
+    private void HandleFallingImpact() { }
 
-
-
-    void Update()
-    {
-        // Vérification sol
-        isGrounded = groundCheck.isGrounded;
-
-        // Attaque Oni
-        if (canAttack && Input.GetMouseButtonDown(0))
-            Attack();
-    }
-
-    // --- Impact de chute ---
     private void TriggerFallImpact()
     {
-        Debug.Log("Feur");
-
         Collider[] hits = Physics.OverlapSphere(transform.position, fallImpactRadius);
-
         foreach (Collider hit in hits)
         {
-            // Dégâts aux ennemis
             Health h = hit.GetComponent<Health>();
             if (h != null)
             {
                 float damage = fallImpactDamage * damageMultiplier;
                 h.TakeDamage(damage);
-                Debug.Log($"[ONI] {hit.name} prend {damage} dégâts de l’impact");
             }
 
-            // Destruction murs / boucliers
             if (hit.CompareTag("Breakable") && canBreakShield)
                 Destroy(hit.gameObject);
         }
     }
+    #endregion
 
-    // --- Attaque Oni ---
-    public void Attack()
+    #region Oni Swing Attack
+    private void TryAttack()
     {
-        if (!canAttack) return;
+        if (isAttacking) return;
+        if (Time.time < lastAttackTime + attackCooldown) return;
+        if (weaponPivot == null) return;
 
-        if (animator != null && attackClip1 != null && attackClip2 != null)
-        {
-            AnimationClip clip = Random.value > 0.5f ? attackClip1 : attackClip2;
-            animator.Play(clip.name);
-        }
+        StartCoroutine(SwingWeapon());
     }
 
-    // --- Animation Event pour dégâts ---
-    public void ApplyAttackDamage()
+    private IEnumerator SwingWeapon()
     {
-        if (!canAttack) return;
+        isAttacking = true;
+        lastAttackTime = Time.time;
 
-        Collider[] hits = Physics.OverlapSphere(transform.position + transform.forward * attackRange, attackRange, enemyLayer);
+        Quaternion startRot = Quaternion.Euler(0f, swingAngle / 2f, 0f);   // droite
+        Quaternion endRot = Quaternion.Euler(0f, -swingAngle / 2f, 0f);    // gauche
+        weaponPivot.localRotation = startRot;
 
-        foreach (Collider hit in hits)
+        HashSet<Health> hitEnemies = new HashSet<Health>();
+
+        float t = 0f;
+        while (t < swingDuration)
         {
-            Health h = hit.GetComponent<Health>();
-            if (h != null)
+            t += Time.deltaTime;
+            float fraction = t / swingDuration;
+            weaponPivot.localRotation = Quaternion.Slerp(startRot, endRot, fraction);
+
+            // Hit check
+            Vector3 hitCenter = weaponPivot.position + weaponPivot.forward * hitDistance;
+            Collider[] hits = Physics.OverlapSphere(hitCenter, hitRadius, enemyLayer);
+
+            foreach (Collider hit in hits)
             {
-                float damage = attackDamage * damageMultiplier;
-                h.TakeDamage(damage);
-                Debug.Log($"[ONI] {hit.name} prend {damage} dégâts via Animation Event");
+                Health h = hit.GetComponent<Health>();
+                if (h != null && !hitEnemies.Contains(h))
+                {
+                    h.TakeDamage(attackDamage * damageMultiplier);
+                    hitEnemies.Add(h);
+                    Debug.Log($"[ONI] {hit.name} touché pour {attackDamage * damageMultiplier}");
+                }
             }
 
-            if (hit.CompareTag("Breakable") && canBreakShield)
-                Destroy(hit.gameObject);
+            yield return null;
         }
+
+        weaponPivot.localRotation = Quaternion.identity;
+        isAttacking = false;
     }
+    #endregion
 
-    bool IsGrounded()
-    {
-        // Simple check, à remplacer par ton GroundCheck si besoin
-        return Physics.Raycast(
-            transform.position,
-            Vector3.down,
-            1.1f
-        );
-    }
-
-    public void Stun(float time)
-    {
-        StartCoroutine(StunCoroutine(time));
-    }
-
-    IEnumerator StunCoroutine(float time)
-    {
-        canRun = false;
-        yield return new WaitForSeconds(time);
-        canRun = true;
-    }
-
-    public Rigidbody Rigidbody => rb;
-    
-    [HideInInspector] public Coroutine airControlCoroutine;
-
+    #region Air Control Recovery
     public void StartAirControlRecovery(float recoveryTime)
     {
         if (airControlCoroutine != null)
-        {
             StopCoroutine(airControlCoroutine);
-            airControlCoroutine = null;
-        }
 
         currentAirControl = 0f;
         airControlCoroutine = StartCoroutine(RestoreAirControlSmooth(recoveryTime));
     }
 
-    IEnumerator RestoreAirControlSmooth(float recoveryTime)
+    private IEnumerator RestoreAirControlSmooth(float recoveryTime)
     {
         float t = 0f;
         float start = 0f;
@@ -311,20 +255,23 @@ public class FirstPersonMovement : MonoBehaviour
         currentAirControl = end;
         airControlCoroutine = null;
     }
+    #endregion
 
-    // Visualisation dans l’éditeur
+    public Rigidbody Rigidbody => rb;
+
     void OnDrawGizmosSelected()
     {
+        if (weaponPivot != null)
+        {
+            Gizmos.color = Color.yellow;
+            Vector3 hitCenter = weaponPivot.position + weaponPivot.forward * hitDistance;
+            Gizmos.DrawWireSphere(hitCenter, hitRadius);
+        }
+
         if (enableFallingImpact)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, fallImpactRadius);
-        }
-
-        if (canAttack)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position + transform.forward * attackRange, attackRange);
         }
     }
 }

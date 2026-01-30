@@ -10,6 +10,7 @@ public class MaskManager : MonoBehaviour
 
     private Mask currentMask;
     private FirstPersonMovement player;
+    private int currentIndex = 0;
 
     void Start()
     {
@@ -28,27 +29,47 @@ public class MaskManager : MonoBehaviour
             if (mask != null)
                 mask.Init(player);
         }
+
+        // Activer le premier masque par défaut
+        if (masks.Length > 0)
+            ChangeMask(0, Color.white);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        // Détection de la molette
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0f)
         {
-            Debug.Log("[INPUT] 1 → TENGU");
-            ChangeMask(0, Color.softBlue);
+            // Molette vers le haut -> masque suivant
+            NextMask();
         }
+        else if (scroll < 0f)
+        {
+            // Molette vers le bas -> masque précédent
+            PreviousMask();
+        }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            Debug.Log("[INPUT] 2 → KITSUNE");
-            ChangeMask(1, new Color(1f, 0.8f, 0f));
-        }
+    void NextMask()
+    {
+        if (masks.Length == 0)
+            return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            Debug.Log("[INPUT] 3 → ONI");
-            ChangeMask(2, Color.red);
-        }
+        currentIndex = (currentIndex + 1) % masks.Length;
+        ChangeMask(currentIndex, Color.white);
+    }
+
+    void PreviousMask()
+    {
+        if (masks.Length == 0)
+            return;
+
+        currentIndex--;
+        if (currentIndex < 0)
+            currentIndex = masks.Length - 1;
+
+        ChangeMask(currentIndex, Color.white);
     }
 
     void ChangeMask(int index, Color transitionColor)
@@ -68,5 +89,7 @@ public class MaskManager : MonoBehaviour
             transitionUI.PlayTransition(transitionColor);
 
         currentMask.Activate();
+
+        Debug.Log($"[MaskManager] Masque activé : {currentMask.name}");
     }
 }

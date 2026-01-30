@@ -4,25 +4,51 @@ using System.Collections;
 
 public class MaskTransitionUI : MonoBehaviour
 {
-    public Image overlay;
-    public float fadeDuration = 0.25f;
+    [Header("UI Elements")]
+    public Image screenBorder; // Image couvrant l'écran pour le contour
+    public float fadeDuration = 0.5f; // durée du fondu
 
-    public void PlayTransition(Color color)
+    private Coroutine currentCoroutine;
+
+    public void PlayTransition(Color maskColor)
     {
-        Debug.Log("[UI] Transition OK");
-        StopAllCoroutines();
-        StartCoroutine(Fade(color));
+        if (screenBorder == null)
+        {
+            Debug.LogWarning("[MaskTransitionUI] screenBorder non assigné !");
+            return;
+        }
+
+        Color startColor = maskColor;
+        startColor.a = 0f; // commence transparent
+
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+
+        currentCoroutine = StartCoroutine(FadeBorder(startColor, maskColor));
     }
 
-    IEnumerator Fade(Color color)
+    private IEnumerator FadeBorder(Color startColor, Color targetColor)
     {
-        // Fade in
-        color.a = 1f;
-        overlay.color = color;
-        yield return new WaitForSeconds(0.05f);
+        float timer = 0f;
+        screenBorder.color = startColor;
 
-        // Fade out
-        color.a = 0f;
-        overlay.color = color;
+        while (timer < fadeDuration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / fadeDuration;
+
+            // Alpha progressif pour fondu
+            Color c = Color.Lerp(startColor, targetColor, t);
+            screenBorder.color = c;
+
+            yield return null;
+        }
+
+        // Retour à alpha = 0
+        Color endColor = targetColor;
+        endColor.a = 0f;
+        screenBorder.color = endColor;
+
+        currentCoroutine = null;
     }
 }

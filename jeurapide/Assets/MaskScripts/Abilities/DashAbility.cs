@@ -9,7 +9,6 @@ public class DashAbility : MonoBehaviour
     public float dashSpeed = 50f;       // vitesse pour interpolation
     public float dashCooldown = 1f;
     public float damage = 25f;
-    public KeyCode dashKey = KeyCode.E;
 
     [Header("References")]
     public Transform cameraTransform;
@@ -34,7 +33,8 @@ public class DashAbility : MonoBehaviour
         if (!player.canDash || !canDashNow)
             return;
 
-        if (Input.GetKeyDown(dashKey))
+        // Utilisation du clic gauche (0) pour dash
+        if (Input.GetMouseButtonDown(0))
         {
             StartCoroutine(Dash());
         }
