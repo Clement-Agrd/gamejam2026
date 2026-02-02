@@ -15,6 +15,7 @@ public class FirstPersonMovement : MonoBehaviour
     public float groundAcceleration = 40f;
     public float airAcceleration = 15f;
     public float maxAirSpeed = 12f;
+    
 
     [Header("Gravity")]
     public float gravityMultiplier = 1f;

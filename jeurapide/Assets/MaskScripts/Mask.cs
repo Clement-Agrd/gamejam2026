@@ -4,6 +4,9 @@ public abstract class Mask : MonoBehaviour
 {
     protected FirstPersonMovement player;
 
+    [Header("UI")]
+    public Sprite icon;   // <-- AJOUT
+
     public virtual void Init(FirstPersonMovement pc) 
     {
         player = pc;
@@ -11,5 +14,4 @@ public abstract class Mask : MonoBehaviour
 
     public abstract void Activate();
     public abstract void Deactivate();
-    
 }

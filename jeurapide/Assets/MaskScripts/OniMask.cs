@@ -19,6 +19,7 @@ public class OniMask : Mask
     {
         player.canJump = false;
         player.speed *= speedMultiplier;
+        player.runSpeed *= speedMultiplier;
         player.gravityMultiplier = oniGravityMultiplier;
 
         player.damageMultiplier = damageMultiplierValue;
@@ -37,6 +38,7 @@ public class OniMask : Mask
     {
         player.canJump = true;
         player.speed /= speedMultiplier;
+        player.runSpeed /= speedMultiplier;
         player.gravityMultiplier = 1f;
 
         player.damageMultiplier = 1f;

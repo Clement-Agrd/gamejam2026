@@ -4,6 +4,10 @@ public class MaskManager : MonoBehaviour
 {
     [Header("Masques")]
     public Mask[] masks;
+    
+    public MaskUIWheel uiWheel;
+    public int CurrentIndex => currentIndex;
+
 
     [Header("UI Transition")]
     public MaskTransitionUI transitionUI;
@@ -29,6 +33,10 @@ public class MaskManager : MonoBehaviour
             if (mask != null)
                 mask.Init(player);
         }
+       
+        if (uiWheel != null)
+            uiWheel.Init(this);
+
 
         // Activer le premier masque par défaut
         if (masks.Length > 0)
@@ -119,5 +127,9 @@ public class MaskManager : MonoBehaviour
         currentMask.Activate();
 
         Debug.Log($"[MaskManager] Masque activé : {currentMask.name}");
+       
+        if (uiWheel != null)
+            uiWheel.Refresh();
+
     }
 }
