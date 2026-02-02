@@ -5,12 +5,14 @@ public class Health : MonoBehaviour
     public float maxHealth = 50f;
     private float currentHealth;
 
+    private PlayerRespawn respawn;
+
     void Awake()
     {
         currentHealth = maxHealth;
+        respawn = GetComponent<PlayerRespawn>();
     }
 
-    // Fonction pour infliger des dégâts
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
@@ -22,10 +24,24 @@ public class Health : MonoBehaviour
         }
     }
 
-    // Fonction appelée quand l'objet meurt
     private void Die()
     {
         Debug.Log($"{gameObject.name} est mort !");
-        Destroy(gameObject);
+
+        // Si c'est le player → respawn
+        if (respawn != null)
+        {
+            respawn.Respawn();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    // 👇 NOUVELLE FONCTION
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
     }
 }
