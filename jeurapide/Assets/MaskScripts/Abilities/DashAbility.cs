@@ -104,7 +104,7 @@ public class DashAbility : MonoBehaviour
                     health.TakeDamage(damage);
             }
 
-            rb.linearVelocity = dashDir * (step / Time.deltaTime);
+            rb.linearVelocity = dashDir * dashSpeed;
             remainingDistance -= step;
 
             yield return null;
