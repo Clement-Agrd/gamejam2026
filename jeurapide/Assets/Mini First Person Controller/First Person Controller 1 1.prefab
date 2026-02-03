@@ -22,9 +22,10 @@ GameObject:
   - component: {fileID: 6905218643291003912}
   - component: {fileID: 3375816515838194898}
   - component: {fileID: 4636757982748456270}
+  - component: {fileID: 2412646137640013338}
   m_Layer: 0
   m_Name: First Person Controller 1 1
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -37,7 +38,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3970138995919084695}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.87, y: 12.9, z: -8.85}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -117,6 +118,7 @@ MonoBehaviour:
   groundAcceleration: 45
   airAcceleration: 15
   maxAirSpeed: 16
+  maxJumpHoldTime: 0.5
   gravityMultiplier: 1
   fallGravityMultiplier: 2
   lowJumpGravityMultiplier: 4
@@ -136,12 +138,15 @@ MonoBehaviour:
   attackDamage: 100
   enableFallingImpact: 0
   fallImpactTime: 0.2
-  fallImpactRadius: 3
+  fallImpactRadius: 10
   fallImpactDamage: 100
+  fallImpactLayers:
+    serializedVersion: 2
+    m_Bits: 136
   massue: {fileID: 6829624168502987221}
   weaponPivot: {fileID: 867628336939450997}
   swingAngle: 120
-  swingDuration: 0.3
+  swingDuration: 0.5
   attackCooldown: 0.6
   hitDistance: 1.5
   hitRadius: 1.2
@@ -231,7 +236,7 @@ MonoBehaviour:
   damageMultiplierValue: 5
   damageReductionValue: 0.5
   fallImpactTimeValue: 0.1
-  fallImpactRadiusValue: 3
+  fallImpactRadiusValue: 6
   fallImpactDamageValue: 100
 --- !u!114 &4973682760451130786
 MonoBehaviour:
@@ -260,9 +265,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DashAbility
   dashDistance: 10
   dashSpeed: 25
-  dashCooldown: 1
+  dashCooldown: 0.4
   damage: 100
   cameraTransform: {fileID: 3687912176469892219}
+  groundCheck: {fileID: 0}
   disableGravityDuringDash: 1
   enemyLayer:
     serializedVersion: 2
@@ -270,6 +276,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
+  maxAirDash: 1
 --- !u!114 &6905218643291003912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,6 +336,19 @@ MonoBehaviour:
     m_Bits: 64
   traversableAlpha: 0.4
   becameSolideAlpha: 0.3
+--- !u!114 &2412646137640013338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3970138995919084695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80b9d1ec1631466b895d488dc1ca8756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  maxHealth: 50
 --- !u!1 &5805923039317271721
 GameObject:
   m_ObjectHideFlags: 0

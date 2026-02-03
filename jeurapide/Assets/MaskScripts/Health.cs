@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Health : MonoBehaviour
 {
@@ -28,13 +29,14 @@ public class Health : MonoBehaviour
     {
         Debug.Log($"{gameObject.name} est mort !");
 
-        // Si c'est le player → respawn
-        if (respawn != null)
+        if (CompareTag("Player"))
         {
-            respawn.Respawn();
+            // Recharge la scène actuelle
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         else
         {
+            // Si ce n'est pas le joueur → on détruit juste l'objet
             Destroy(gameObject);
         }
     }

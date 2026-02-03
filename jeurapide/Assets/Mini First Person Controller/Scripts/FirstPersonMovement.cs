@@ -16,6 +16,11 @@ public class FirstPersonMovement : MonoBehaviour
     public float airAcceleration = 15f;
     public float maxAirSpeed = 12f;
     
+    [Header("Jump Hold")]
+    public float maxJumpHoldTime = 0.8f;
+    private float jumpHoldTimer = 0f;
+
+    
 
     [Header("Gravity")]
     public float gravityMultiplier = 1f;
@@ -49,6 +54,8 @@ public class FirstPersonMovement : MonoBehaviour
     public float fallImpactTime = 1f;
     public float fallImpactRadius = 3f;
     public float fallImpactDamage = 50f;
+    public LayerMask fallImpactLayers; // <-- AJOUT
+
 
     [Header("Oni Weapon")]
     public GameObject massue;               // Ton objet massue
@@ -110,6 +117,9 @@ public class FirstPersonMovement : MonoBehaviour
     private void HandleMovement()
     {
         if (IsDashing) return;
+        
+        if (isGrounded)
+            jumpHoldTimer = 0f;
 
         if (!isGrounded) fallTimer += Time.fixedDeltaTime;
         else
@@ -148,19 +158,53 @@ public class FirstPersonMovement : MonoBehaviour
     {
         float baseGravity = 9.81f * gravityMultiplier;
 
+        // Si on monte
+        if (rb.linearVelocity.y > 0)
+        {
+            // Si on tient espace ET qu'on peut jump → on compte le temps
+            if (Input.GetKey(KeyCode.Space) && canJump)
+            {
+                jumpHoldTimer += Time.fixedDeltaTime;
+
+                // Si on dépasse la durée max → on force la low gravity
+                if (jumpHoldTimer > maxJumpHoldTime)
+                {
+                    rb.AddForce(Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f), ForceMode.Acceleration);
+                }
+            }
+            else
+            {
+                // Pas espace → low jump direct
+                rb.AddForce(Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f), ForceMode.Acceleration);
+            }
+        }
+
+        // Si on descend
         if (rb.linearVelocity.y < 0)
+        {
             rb.AddForce(Vector3.down * baseGravity * (fallGravityMultiplier - 1f), ForceMode.Acceleration);
-        else if (rb.linearVelocity.y > 0 && (!Input.GetKey(KeyCode.Space) || !canJump))
-            rb.AddForce(Vector3.down * baseGravity * (lowJumpGravityMultiplier - 1f), ForceMode.Acceleration);
+        }
     }
+
     
 
     // --- Impact de chute ---
     private void TriggerFallImpact()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, fallImpactRadius);
+        Debug.Log("Boumm");
+        Collider[] hits = Physics.OverlapSphere
+        (
+            transform.position,
+            fallImpactRadius,
+            fallImpactLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
         foreach (Collider hit in hits)
         {
+            if (hit.attachedRigidbody == rb) 
+                continue; // ignore le player
+
             Health h = hit.GetComponent<Health>();
             if (h != null)
             {
@@ -171,6 +215,7 @@ public class FirstPersonMovement : MonoBehaviour
             if (hit.CompareTag("Breakable") && canBreakShield)
                 Destroy(hit.gameObject);
         }
+
     }
 
     
