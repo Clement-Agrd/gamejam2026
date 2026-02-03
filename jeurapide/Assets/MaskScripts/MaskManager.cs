@@ -37,20 +37,48 @@ public class MaskManager : MonoBehaviour
 
     void Update()
     {
-        // Détection de la molette
+        HandleScrollInput();
+        HandleKeyboardInput(); // 👈 NOUVEAU
+    }
+
+    // ================= MOLETTE =================
+    void HandleScrollInput()
+    {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
+
         if (scroll > 0f)
         {
-            // Molette vers le haut -> masque suivant
             NextMask();
         }
         else if (scroll < 0f)
         {
-            // Molette vers le bas -> masque précédent
             PreviousMask();
         }
     }
 
+    // ================= CLAVIER =================
+    void HandleKeyboardInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            SelectMask(0);
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            SelectMask(1);
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            SelectMask(2);
+    }
+
+    void SelectMask(int index)
+    {
+        if (index < 0 || index >= masks.Length)
+            return;
+
+        currentIndex = index;
+        ChangeMask(currentIndex, Color.white);
+    }
+
+    // ================= LOGIQUE MASQUES =================
     void NextMask()
     {
         if (masks.Length == 0)
@@ -78,7 +106,7 @@ public class MaskManager : MonoBehaviour
             return;
 
         if (currentMask == masks[index])
-            return; // même masque -> ne rien changer
+            return;
 
         if (currentMask != null)
             currentMask.Deactivate();
