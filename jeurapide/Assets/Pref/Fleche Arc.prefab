@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3987354471982166052
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.009462369
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.009462369
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.00946237
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.276
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.247
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 16.841
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.12295646
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.6798679
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.70034444
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.1793849
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -4.823
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -155.316
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -89.356
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      propertyPath: m_Name
+      value: Fleche Arc
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4311929950461759685}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7083419227219260702}
+  m_SourcePrefab: {fileID: 100100000, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+--- !u!1 &4293201574077058421 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: fa9f878600cb77647a20e12f1e963f6f, type: 3}
+  m_PrefabInstance: {fileID: 3987354471982166052}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &4311929950461759685
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4293201574077058421}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.0000002, y: 2.4354274, z: 24.651361}
+  m_Center: {x: 0.00000009902213, y: 0.010273684, z: -0.4286746}
+--- !u!114 &-7083419227219260702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4293201574077058421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3331e62d03e548d79b2009f0635944d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TurretProjectile
+  speed: 20
+  damage: 10
+  lifeTime: 5

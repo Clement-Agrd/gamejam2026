@@ -14669,6 +14669,11 @@ PrefabInstance:
     - target: {fileID: 6853309227212296223, guid: 1c2e37004740e5e46a5160add8200103, type: 3}
       propertyPath: uiWheel
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6790081738569055238, guid: 1c2e37004740e5e46a5160add8200103, type: 3}
+      propertyPath: damageMultiplierValue
+      value: 100
+      objectReference: {fileID: 0}
       objectReference: {fileID: 1250624158}
     - target: {fileID: 6907918250900410705, guid: 1c2e37004740e5e46a5160add8200103, type: 3}
       propertyPath: m_LocalPosition.x

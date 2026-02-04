@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Turret : MonoBehaviour
 {
@@ -16,6 +16,9 @@ public class Turret : MonoBehaviour
     public GameObject projectilePrefab;
     public Transform firePoint;
     public float fireRate = 1f;
+
+    [Header("Audio")]
+    public AudioSource shootAudio;
 
     private bool active = false;
     private float fireTimer;
@@ -60,6 +63,10 @@ public class Turret : MonoBehaviour
             firePoint.rotation = Quaternion.LookRotation(dir);
 
             Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+
+            // 🔊 SON DE TIR (UN SEUL SON)
+            if (shootAudio != null)
+                shootAudio.Play();
         }
     }
 

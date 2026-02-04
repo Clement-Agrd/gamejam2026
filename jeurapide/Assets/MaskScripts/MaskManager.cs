@@ -4,13 +4,15 @@ public class MaskManager : MonoBehaviour
 {
     [Header("Masques")]
     public Mask[] masks;
-    
+
     public MaskUIWheel uiWheel;
     public int CurrentIndex => currentIndex;
 
-
     [Header("UI Transition")]
     public MaskTransitionUI transitionUI;
+
+    [Header("Audio")]
+    public AudioSource maskChangeAudio;
 
     private Mask currentMask;
     private FirstPersonMovement player;
@@ -18,7 +20,6 @@ public class MaskManager : MonoBehaviour
 
     void Start()
     {
-        // RÉFÉRENCE PLAYER
         player = GetComponent<FirstPersonMovement>();
 
         if (player == null)
@@ -27,18 +28,15 @@ public class MaskManager : MonoBehaviour
             return;
         }
 
-        // INIT DES MASQUES
         foreach (Mask mask in masks)
         {
             if (mask != null)
                 mask.Init(player);
         }
-       
+
         if (uiWheel != null)
             uiWheel.Init(this);
 
-
-        // Activer le premier masque par défaut
         if (masks.Length > 0)
             ChangeMask(0, Color.white);
     }
@@ -46,33 +44,25 @@ public class MaskManager : MonoBehaviour
     void Update()
     {
         HandleScrollInput();
-        HandleKeyboardInput(); // 👈 NOUVEAU
+        HandleKeyboardInput();
     }
 
-    // ================= MOLETTE =================
     void HandleScrollInput()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         if (scroll > 0f)
-        {
             NextMask();
-        }
         else if (scroll < 0f)
-        {
             PreviousMask();
-        }
     }
 
-    // ================= CLAVIER =================
     void HandleKeyboardInput()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
             SelectMask(0);
-
         if (Input.GetKeyDown(KeyCode.Alpha2))
             SelectMask(1);
-
         if (Input.GetKeyDown(KeyCode.Alpha3))
             SelectMask(2);
     }
@@ -86,7 +76,6 @@ public class MaskManager : MonoBehaviour
         ChangeMask(currentIndex, Color.white);
     }
 
-    // ================= LOGIQUE MASQUES =================
     void NextMask()
     {
         if (masks.Length == 0)
@@ -126,10 +115,11 @@ public class MaskManager : MonoBehaviour
 
         currentMask.Activate();
 
-        Debug.Log($"[MaskManager] Masque activé : {currentMask.name}");
-       
+        // 🔊 SON DE CHANGEMENT DE MASQUE (UN SEUL SON)
+        if (maskChangeAudio != null)
+            maskChangeAudio.Play();
+
         if (uiWheel != null)
             uiWheel.Refresh();
-
     }
 }

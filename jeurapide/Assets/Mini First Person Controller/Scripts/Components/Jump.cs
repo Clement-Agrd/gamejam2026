@@ -17,6 +17,9 @@ public class Jump : MonoBehaviour
     public int jumpCount = 0;
     public int maxJumps = 1;
 
+    [Header("Audio")]
+    public AudioSource jumpAudio;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -52,6 +55,7 @@ public class Jump : MonoBehaviour
             PerformJump();
         }
     }
+
     IEnumerator ConfirmJump()
     {
         yield return new WaitForFixedUpdate();
@@ -62,7 +66,6 @@ public class Jump : MonoBehaviour
         }
     }
 
-
     void PerformJump()
     {
         Vector3 velocity = rb.linearVelocity;
@@ -70,9 +73,13 @@ public class Jump : MonoBehaviour
         rb.linearVelocity = velocity;
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+
+        // 🔊 SON DE SAUT (UN SEUL SON)
+        if (jumpAudio != null)
+            jumpAudio.Play();
+
         StartCoroutine(ConfirmJump());
     }
-
 
     void OnGrounded()
     {

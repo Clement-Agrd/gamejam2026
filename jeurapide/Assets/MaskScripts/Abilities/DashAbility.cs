@@ -23,6 +23,9 @@ public class DashAbility : MonoBehaviour
     public int maxAirDash = 1;
     private int dashCount = 0;
 
+    [Header("Audio")]
+    public AudioSource dashAudio;
+
     private FirstPersonMovement player;
     private bool canDashNow = true;
 
@@ -56,7 +59,6 @@ public class DashAbility : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            // Si en l'air → vérifier limite
             if (!IsGrounded() && dashCount >= maxAirDash)
                 return;
 
@@ -74,7 +76,10 @@ public class DashAbility : MonoBehaviour
         canDashNow = false;
         player.IsDashing = true;
 
-        // Si on est en l’air → on consomme un dash
+        // 🔊 SON DE DASH
+        if (dashAudio != null)
+            dashAudio.Play();
+
         if (!IsGrounded())
             dashCount++;
 
@@ -90,13 +95,9 @@ public class DashAbility : MonoBehaviour
         {
             float step = dashSpeed * Time.deltaTime;
 
-            // Collision obstacle
             if (rb.SweepTest(dashDir, out RaycastHit hitObstacle, step, QueryTriggerInteraction.Ignore))
-            {
                 break;
-            }
 
-            // Ennemis
             if (Physics.Raycast(rb.position, dashDir, out RaycastHit hitEnemy, step, enemyLayer))
             {
                 Health health = hitEnemy.collider.GetComponent<Health>();
@@ -121,6 +122,6 @@ public class DashAbility : MonoBehaviour
 
     void OnGrounded()
     {
-        dashCount = 0; // reset quand on touche le sol
+        dashCount = 0;
     }
 }
