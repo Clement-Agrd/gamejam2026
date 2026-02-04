@@ -2,6 +2,9 @@
 
 public class Turret : MonoBehaviour
 {
+    [Header("Aim")]
+    public float aimHeight = 1.5f; // hauteur à viser (tête / torse)
+
     [Header("Target")]
     public Transform player;
 
@@ -49,9 +52,18 @@ public class Turret : MonoBehaviour
         if (fireTimer >= fireRate)
         {
             fireTimer = 0f;
+
+            // viser un point au-dessus des pieds du joueur
+            Vector3 targetPos = player.position + Vector3.up * aimHeight;
+
+            Vector3 dir = (targetPos - firePoint.position).normalized;
+            firePoint.rotation = Quaternion.LookRotation(dir);
+
             Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         }
     }
+
+
 
     public void SetActive(bool value, Transform target)
     {
