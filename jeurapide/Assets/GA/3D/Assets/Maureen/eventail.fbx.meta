@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 8bd357747ac80e0418d39675e9f299cb
+=======
+guid: 1e600e8e4ccf3d24faaa7c743ebd06e6
+>>>>>>> a9cded4 (nicke ta mère le LD)
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
