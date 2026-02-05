@@ -12,20 +12,17 @@ EditorBuildSettings:
     path: Assets/Scenes/Niveau/Niveau_1.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/Niveau/Niveau_2.unity
-    guid: f9915ee63649fcf4081a817c1c0102b0
+    path: Assets/Scenes/Les vrais niveaux tkt/Level 2 Tengu.unity
+    guid: e7f91ec595c693c48af6dbb37c10ffc6
   - enabled: 1
-    path: Assets/Scenes/Niveau/Niveau_3.unity
-    guid: 1dec61485ff1d464a8e9afe9b956b199
+    path: Assets/Scenes/Les vrais niveaux tkt/Level 3 Kistune.unity
+    guid: 0afac56cae1db9a45ad7ca173e595d6e
   - enabled: 1
-    path: Assets/Scenes/Niveau/Niveau_4.unity
-    guid: 9c82752ec2abf454ea34f24eea6f6365
+    path: Assets/Scenes/Les vrais niveaux tkt/Level 4 Oni.unity
+    guid: ecd11e2652a462c4995e468a0389e58b
   - enabled: 1
     path: Assets/Scenes/Niveau/Niveau_5.unity
     guid: 24c1216f5c25caa4c954093100f19374
-  - enabled: 1
-    path: Assets/Scenes/Niveau/Niveau_6.unity
-    guid: 4a025411d4c522b45b5ff30193ef8acd
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
