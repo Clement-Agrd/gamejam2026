@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: f8a60d169ab8a46b09c9b01a3e51601f, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -93,8 +93,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 61e70bf33abe51b429ebb9bad823bc15, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: cbac31fc3c2e69c47b7f2b68fb50fff2, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -67274,6 +67274,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 949575434757374910, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: m_Radius
+      value: 7.47
+      objectReference: {fileID: 0}
     - target: {fileID: 1121247672083973730, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -67326,6 +67330,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 5412749487384943133, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 641065250166383393}
     - target: {fileID: 5465409216822770895, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -80812,7 +80820,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: bbb47170c22ccd14095c4179e619996d, type: 2}
+  - {fileID: 2100000, guid: 093e0bbee454f6d45b83e1a75ffc2c61, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -80852,8 +80860,8 @@ Transform:
   m_GameObject: {fileID: 1271887587}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.70710576, z: -0, w: 0.70710784}
-  m_LocalPosition: {x: 13.13114, y: -43.21873, z: -26.918747}
-  m_LocalScale: {x: 14.830151, y: 1, z: 28.01157}
+  m_LocalPosition: {x: 13.13114, y: -43.21873, z: -27.4891}
+  m_LocalScale: {x: 13.689712, y: 1, z: 28.01157}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 828337046}
@@ -82893,6 +82901,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 949575434757374910, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: m_Radius
+      value: 10.47
+      objectReference: {fileID: 0}
     - target: {fileID: 1121247672083973730, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -82945,6 +82957,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 5412749487384943133, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 641065250166383393}
     - target: {fileID: 5465409216822770895, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -117980,6 +117996,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 949575434757374910, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: m_Radius
+      value: 7.38
+      objectReference: {fileID: 0}
     - target: {fileID: 1121247672083973730, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -118032,6 +118052,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 5412749487384943133, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 641065250166383393}
     - target: {fileID: 5465409216822770895, guid: ff07fcb9b63f5ce4cb14fb38baf9f05b, type: 3}
       propertyPath: m_Layer
       value: 7
