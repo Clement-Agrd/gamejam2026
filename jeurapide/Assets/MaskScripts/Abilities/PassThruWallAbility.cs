@@ -22,11 +22,11 @@ public class PassThruWallAbility : MonoBehaviour
 
     // Traversable walls
     private HashSet<Collider> ignoredColliders = new HashSet<Collider>();
-    private Dictionary<Renderer, Color> traversableOriginalColors = new Dictionary<Renderer, Color>();
+    private Dictionary<Renderer, Color[]> traversableOriginalColors = new Dictionary<Renderer, Color[]>();
 
     // Became solid walls
     private HashSet<Collider> solidColliders = new HashSet<Collider>();
-    private Dictionary<Renderer, Color> solidOriginalColors = new Dictionary<Renderer, Color>();
+    private Dictionary<Renderer, Color[]> solidOriginalColors = new Dictionary<Renderer, Color[]>();
 
     void Awake()
     {
@@ -42,14 +42,14 @@ public class PassThruWallAbility : MonoBehaviour
         if (!player.canPassThruWall)
         {
             // Ability OFF
-            RestoreTraversableWalls();      // murs normaux redeviennent solides
-            DetectBecameSolideWalls();      // BecameSolid deviennent traversables
+            RestoreTraversableWalls();
+            DetectBecameSolideWalls();
         }
         else
         {
             // Ability ON
-            DetectTraversableWalls();       // murs normaux deviennent traversables
-            RestoreBecameSolideWalls();     // BecameSolid redeviennent solides
+            DetectTraversableWalls();
+            RestoreBecameSolideWalls();
         }
     }
 
@@ -68,7 +68,7 @@ public class PassThruWallAbility : MonoBehaviour
 
             if (!ignoredColliders.Contains(hit))
             {
-                Physics.IgnoreCollision(playerCollider, hit, true); // devient traversable
+                Physics.IgnoreCollision(playerCollider, hit, true);
                 ignoredColliders.Add(hit);
                 ApplyTransparency(hit, traversableAlpha, traversableOriginalColors);
             }
@@ -80,7 +80,7 @@ public class PassThruWallAbility : MonoBehaviour
         foreach (var col in ignoredColliders)
         {
             if (col != null)
-                Physics.IgnoreCollision(playerCollider, col, false); // redevient solide
+                Physics.IgnoreCollision(playerCollider, col, false);
         }
 
         RestoreVisuals(traversableOriginalColors);
@@ -102,7 +102,7 @@ public class PassThruWallAbility : MonoBehaviour
 
             if (!solidColliders.Contains(hit))
             {
-                Physics.IgnoreCollision(playerCollider, hit, true); // devient traversable
+                Physics.IgnoreCollision(playerCollider, hit, true);
                 solidColliders.Add(hit);
                 ApplyTransparency(hit, becameSolideAlpha, solidOriginalColors);
             }
@@ -114,7 +114,7 @@ public class PassThruWallAbility : MonoBehaviour
         foreach (var col in solidColliders)
         {
             if (col != null)
-                Physics.IgnoreCollision(playerCollider, col, false); // redevient solide
+                Physics.IgnoreCollision(playerCollider, col, false);
         }
 
         RestoreVisuals(solidOriginalColors);
@@ -125,28 +125,53 @@ public class PassThruWallAbility : MonoBehaviour
     // VISUAL HELPERS
     // =========================
 
-    void ApplyTransparency(Collider col, float alpha, Dictionary<Renderer, Color> colorCache)
+    void ApplyTransparency(Collider col, float alpha, Dictionary<Renderer, Color[]> colorCache)
     {
         Renderer r = col.GetComponent<Renderer>();
         if (r == null) return;
 
+        Material[] mats = r.materials;
+
         if (!colorCache.ContainsKey(r))
         {
-            r.material = new Material(r.material); // clone material
-            colorCache[r] = r.material.color;
+            Material[] newMats = new Material[mats.Length];
+            Color[] originalColors = new Color[mats.Length];
+
+            for (int i = 0; i < mats.Length; i++)
+            {
+                newMats[i] = new Material(mats[i]); // clone
+                originalColors[i] = newMats[i].color;
+            }
+
+            r.materials = newMats;
+            colorCache[r] = originalColors;
+            mats = newMats;
         }
 
-        Color c = r.material.color;
-        c.a = alpha;
-        r.material.color = c;
+        // Applique alpha à tous les materials
+        for (int i = 0; i < mats.Length; i++)
+        {
+            Color c = mats[i].color;
+            c.a = alpha;
+            mats[i].color = c;
+        }
     }
 
-    void RestoreVisuals(Dictionary<Renderer, Color> colorCache)
+    void RestoreVisuals(Dictionary<Renderer, Color[]> colorCache)
     {
         foreach (var pair in colorCache)
         {
-            if (pair.Key != null)
-                pair.Key.material.color = pair.Value;
+            Renderer r = pair.Key;
+            Color[] colors = pair.Value;
+
+            if (r == null) continue;
+
+            Material[] mats = r.materials;
+
+            for (int i = 0; i < mats.Length && i < colors.Length; i++)
+            {
+                mats[i].color = colors[i];
+            }
         }
 
         colorCache.Clear();

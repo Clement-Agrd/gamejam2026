@@ -140,7 +140,7 @@ MonoBehaviour:
   canWallRun: 0
   canBreakShield: 0
   damageMultiplier: 1
-  attackDamage: 100
+  attackDamage: 1
   enableFallingImpact: 0
   fallImpactTime: 0.2
   fallImpactRadius: 10
@@ -240,7 +240,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: eaf5281d533e83546b3ee05e54be5e62, type: 3}
   speedMultiplier: 0.5
   oniGravityMultiplier: 5
-  damageMultiplierValue: 5
+  damageMultiplierValue: 100
   damageReductionValue: 0.5
   fallImpactTimeValue: 0.1
   fallImpactRadiusValue: 6
@@ -270,8 +270,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b5596e187351b2448267ec2b1aef7cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DashAbility
-  dashDistance: 10
-  dashSpeed: 25
+  dashDistance: 6
+  dashSpeed: 30
   dashCooldown: 0.4
   damage: 100
   cameraTransform: {fileID: 3687912176469892219}
